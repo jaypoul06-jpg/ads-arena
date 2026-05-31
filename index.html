@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADS ARENA</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --tg-theme-bg-color: #000000;
+            --tg-theme-text-color: #ffffff;
+            --tg-theme-button-color: #1e88e5;
+            --tg-theme-button-text-color: #ffffff;
+            --tg-theme-secondary-bg-color: #111111;
+            --tg-theme-hint-color: #666666;
+            --primary-blue: #1e88e5;
+            --secondary-blue: #0d47a1;
+            --success-green: #4caf50;
+            --warning-orange: #ff9800;
+            --danger-red: #f44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: var(--tg-theme-hint-color);
+            font-size: 14px;
+        }
+
+        .user-info {
+            background: var(--tg-theme-secondary-bg-color);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(30, 136, 229, 0.2);
+        }
+
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .user-name {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            background: rgba(30, 136, 229, 0.1);
+            border-radius: 12px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color);
+            margin-top: 4px;
+        }
+
+        .button {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 12px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .button:hover {
+            background: var(--secondary-blue);
+            transform: translateY(-1px);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button.secondary {
+            background: var(--tg-theme-secondary-bg-color);
+            border: 1px solid var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .button.success {
+            background: var(--success-green);
+        }
+
+        .button.disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .card {
+            background: var(--tg-theme-secondary-bg-color);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(30, 136, 229, 0.2);
+        }
+
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(30, 136, 229, 0.2);
+        }
+
+        .task-info h3 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .task-info p {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color);
+        }
+
+        .task-reward {
+            color: var(--primary-blue);
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .ad-viewer {
+            width: 100%;
+            min-height: 300px;
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 2px dashed var(--primary-blue);
+        }
+
+        .ad-content {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .timer {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary-blue);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-blue);
+            transition: width 0.3s ease;
+        }
+
+        .referral-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .referral-input {
+            flex: 1;
+            padding: 12px;
+            background: var(--tg-theme-secondary-bg-color);
+            border: 1px solid var(--primary-blue);
+            border-radius: 8px;
+            color: var(--tg-theme-text-color);
+            font-size: 14px;
+        }
+
+        .copy-button {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .rank {
+            width: 32px;
+            height: 32px;
+            background: var(--primary-blue);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+
+        .rank.gold { background: #ffd700; color: #000; }
+        .rank.silver { background: #c0c0c0; color: #000; }
+        .rank.bronze { background: #cd7f32; color: #fff; }
+
+        .leaderboard-info {
+            flex: 1;
+        }
+
+        .leaderboard-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .leaderboard-count {
+            color: var(--tg-theme-hint-color);
+            font-size: 14px;
+        }
+
+        .withdrawal-form {
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            background: var(--tg-theme-secondary-bg-color);
+            border: 1px solid var(--primary-blue);
+            border-radius: 8px;
+            color: var(--tg-theme-text-color);
+            font-size: 16px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .history-info {
+            flex: 1;
+        }
+
+        .history-type {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .history-date {
+            color: var(--tg-theme-hint-color);
+            font-size: 14px;
+        }
+
+        .history-amount {
+            font-weight: bold;
+        }
+
+        .history-amount.positive {
+            color: var(--success-green);
+        }
+
+        .history-amount.negative {
+            color: var(--danger-red);
+        }
+
+        .admin-panel {
+            margin-bottom: 24px;
+        }
+
+        .admin-section {
+            margin-bottom: 32px;
+        }
+
+        .admin-section h3 {
+            margin-bottom: 16px;
+            color: var(--primary-blue);
+        }
+
+        .ad-form {
+            margin-bottom: 24px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--tg-theme-secondary-bg-color);
+            border-top: 3px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: var(--danger-red);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .success {
+            background: var(--success-green);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--tg-theme-secondary-bg-color);
+            border-top: 1px solid rgba(30, 136, 229, 0.2);
+            padding: 8px 0;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .nav-item {
+            text-align: center;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--tg-theme-hint-color);
+        }
+
+        .nav-item.active {
+            color: var(--primary-blue);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--tg-theme-hint-color);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 640px;
+                margin: 0 auto;
+                padding: 24px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .bottom-nav {
+                position: relative;
+                background: none;
+                border: none;
+                margin-top: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Dashboard Screen -->
+        <div id="dashboard" class="screen active">
+            <div class="header">
+                <h1>🎯 ADS ARENA</h1>
+                <p>Watch ads, earn coins, make money!</p>
+            </div>
+
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">👤</div>
+                <div class="user-name" id="userName">Loading...</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="userBalance">0</div>
+                        <div class="stat-label">Balance</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalEarnings">0</div>
+                        <div class="stat-label">Total Earned</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="tasksCompleted">0</div>
+                        <div class="stat-label">Ads Watched</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="referralCount">0</div>
+                        <div class="stat-label">Referrals</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">🚀 Quick Actions</h3>
+                <button class="button" onclick="showScreen('tasks')">
+                    📺 Watch Ads (+10 coins each)
+                </button>
+                <button class="button secondary" onclick="showScreen('referrals')">
+                    👥 Invite Friends (+50 coins each)
+                </button>
+                <button class="button secondary" onclick="showScreen('withdrawal')">
+                    💰 Request Withdrawal
+                </button>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 12px;">📊 Daily Progress</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span>Ads Watched Today</span>
+                    <span id="dailyProgress">0/30</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <p style="color: var(--tg-theme-hint-color); font-size: 14px; text-align: center;">
+                    Complete all 30 ads to unlock bonus rewards!
+                </p>
+            </div>
+        </div>
+
+        <!-- Tasks Screen -->
+        <div id="tasks" class="screen">
+            <div class="header">
+                <h1>📺 Available Ads</h1>
+                <p>Watch ads for 15 seconds to earn 10 coins each</p>
+            </div>
+
+            <div class="loading" id="tasksLoading">
+                <div class="spinner"></div>
+                <p>Loading advertisements...</p>
+            </div>
+
+            <div id="tasksContent">
+                <div class="card">
+                    <h3 style="margin-bottom: 16px;">🎯 Today's Tasks</h3>
+                    <p style="color: var(--tg-theme-hint-color); margin-bottom: 16px;">
+                        Complete all tasks to maximize your earnings!
+                    </p>
+                    <div id="tasksList"></div>
+                </div>
+
+                <div class="empty-state" id="noTasks" style="display: none;">
+                    <div class="empty-icon">🎉</div>
+                    <h3>All Ads Completed!</h3>
+                    <p>You've watched all available ads for today. Come back tomorrow for more!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ad Viewer Screen -->
+        <div id="adViewer" class="screen">
+            <div class="header">
+                <h1>📺 Viewing Advertisement</h1>
+                <p>Stay on this page for 15 seconds to earn your reward</p>
+            </div>
+
+            <div class="ad-viewer">
+                <div class="timer" id="adTimer">15s</div>
+                <div class="ad-content" id="adContent">
+                    <div class="empty-icon">📺</div>
+                    <h3>Advertisement Loading...</h3>
+                    <p>Please wait while the ad loads</p>
+                </div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="adProgress" style="width: 0%"></div>
+            </div>
+
+            <div id="adControls">
+                <button class="button disabled" id="claimButton" disabled>
+                    ⏱️ Wait 15 seconds to claim reward
+                </button>
+            </div>
+        </div>
+
+        <!-- Referrals Screen -->
+        <div id="referrals" class="screen">
+            <div class="header">
+                <h1>👥 Referral Program</h1>
+                <p>Invite friends and earn 50 coins for each referral</p>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">💰 Your Referral Earnings</h3>
+                <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr);">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalReferrals">0</div>
+                        <div class="stat-label">Total Referrals</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="referralEarnings">0</div>
+                        <div class="stat-label">Coins Earned</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">🔗 Your Referral Link</h3>
+                <div class="referral-box">
+                    <input type="text" class="referral-input" id="referralLink" readonly>
+                    <button class="copy-button" onclick="copyReferralLink()">📋 Copy</button>
+                </div>
+                <button class="button" onclick="shareReferralLink()">
+                    📤 Share Link
+                </button>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">🏆 Top Referrers</h3>
+                <div id="leaderboard"></div>
+            </div>
+        </div>
+
+        <!-- Withdrawal Screen -->
+        <div id="withdrawal" class="screen">
+            <div class="header">
+                <h1>💰 Request Withdrawal</h1>
+                <p>Minimum withdrawal: 10,000 coins</p>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">💳 Current Balance</h3>
+                <div class="stat-item" style="margin-bottom: 16px;">
+                    <div class="stat-value" id="withdrawalBalance">0</div>
+                    <div class="stat-label">Available for Withdrawal</div>
+                </div>
+                
+                <div id="withdrawalEligible" style="display: none;">
+                    <div class="withdrawal-form">
+                        <div class="form-group">
+                            <label class="form-label">Withdrawal Method</label>
+                            <select class="form-input" id="withdrawalMethod">
+                                <option value="paypal">PayPal</option>
+                                <option value="bank">Bank Transfer</option>
+                                <option value="crypto">Cryptocurrency</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Account Details</label>
+                            <input type="text" class="form-input" id="accountDetails" placeholder="Enter your account details">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Amount (Coins)</label>
+                            <input type="number" class="form-input" id="withdrawalAmount" min="10000" placeholder="10000">
+                        </div>
+                        
+                        <button class="button" onclick="requestWithdrawal()">
+                            🚀 Request Withdrawal
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="withdrawalNotEligible">
+                    <div class="empty-state">
+                        <div class="empty-icon">💰</div>
+                        <h3>Keep Earning!</h3>
+                        <p>You need <span id="coinsNeeded">10,000</span> more coins to request withdrawal.</p>
+                        <button class="button" onclick="showScreen('tasks')" style="margin-top: 16px;">
+                            📺 Watch More Ads
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">📋 Withdrawal History</h3>
+                <div id="withdrawalHistory"></div>
+            </div>
+        </div>
+
+        <!-- Profile Screen -->
+        <div id="profile" class="screen">
+            <div class="header">
+                <h1>👤 Profile</h1>
+                <p>Your earnings and activity history</p>
+            </div>
+
+            <div class="user-info">
+                <div class="user-avatar" id="profileAvatar">👤</div>
+                <div class="user-name" id="profileName">Loading...</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="profileBalance">0</div>
+                        <div class="stat-label">Current Balance</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="profileEarnings">0</div>
+                        <div class="stat-label">Total Earned</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="profileTasks">0</div>
+                        <div class="stat-label">Ads Completed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="profileReferrals">0</div>
+                        <div class="stat-label">Referrals</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">📊 Earnings History</h3>
+                <div id="earningsHistory"></div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">⚙️ Settings</h3>
+                <button class="button secondary" onclick="resetProgress()">
+                    🔄 Reset Daily Progress
+                </button>
+                <button class="button secondary" onclick="exportData()">
+                    📤 Export Data
+                </button>
+            </div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div id="admin" class="screen">
+            <div class="header">
+                <h1>⚙️ Admin Panel</h1>
+                <p>Manage advertisements and users</p>
+            </div>
+
+            <div class="admin-panel">
+                <div class="admin-section">
+                    <h3>📺 Advertisement Management</h3>
+                    <div class="card">
+                        <div class="ad-form">
+                            <div class="form-group">
+                                <label class="form-label">Ad Title</label>
+                                <input type="text" class="form-input" id="adTitle" placeholder="Enter ad title">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Ad Description</label>
+                                <input type="text" class="form-input" id="adDescription" placeholder="Enter ad description">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Ad URL</label>
+                                <input type="url" class="form-input" id="adUrl" placeholder="https://example.com">
+                            </div>
