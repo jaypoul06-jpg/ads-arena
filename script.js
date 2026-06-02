@@ -67,7 +67,9 @@ function watchAd() {
         userData.balance += 70;
         userData.totalEarned += 70;
         userData.adsWatched += 1;
-addHistory("Watched Monetag Ad", 70);
+
+        addHistory("Watched Monetag Ad", 70);
+        
         saveData();
         updateStats();
 
