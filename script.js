@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", () => {
 
     const app = document.getElementById("app");
@@ -8,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (app) app.style.display = "block";
     }, 2000);
 
-    // Telegram user setup
+    // Telegram user
     try {
         if (window.Telegram && Telegram.WebApp) {
             Telegram.WebApp.ready();
@@ -16,22 +17,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const user = Telegram.WebApp.initDataUnsafe?.user;
 
             if (user) {
-                const name =
-                    `${user.first_name || ""} ${user.last_name || ""}`.trim();
+                const name = `${user.first_name || ""} ${user.last_name || ""}`.trim();
 
-                const userNameEl =
-                    document.getElementById("user-name");
-
-                const profileNameEl =
-                    document.getElementById("profile-name");
+                const userNameEl = document.getElementById("user-name");
+                const profileNameEl = document.getElementById("profile-name");
 
                 if (userNameEl) userNameEl.textContent = name;
                 if (profileNameEl) profileNameEl.textContent = name;
             }
         }
-    } catch (e) {
-        console.log("Telegram error:", e);
-    }
+    } catch (e) {}
 
     updateStats();
     renderHistory();
@@ -40,11 +35,12 @@ document.addEventListener("DOMContentLoaded", () => {
     setupTheme();
     setupNavigation();
     setupButtons();
+    updateDailyProgress();
 });
 
 
 // ===========================
-// USER DATA SAFE LOAD
+// USER DATA SAFE INIT
 // ===========================
 
 let userData = {};
@@ -64,7 +60,7 @@ userData.refEarnings = Number(userData.refEarnings) || 0;
 
 
 // ===========================
-// SAVE DATA
+// SAVE
 // ===========================
 
 function saveData() {
@@ -73,15 +69,13 @@ function saveData() {
 
 
 // ===========================
-// UPDATE STATS
+// STATS
 // ===========================
 
 function updateStats() {
 
     const balance = document.getElementById("hero-balance");
-    if (balance) {
-        balance.innerHTML = `${userData.balance} <span>PTS</span>`;
-    }
+    if (balance) balance.innerHTML = `${userData.balance} <span>PTS</span>`;
 
     const earnings = document.getElementById("stat-earnings");
     if (earnings) earnings.textContent = userData.totalEarned;
@@ -103,9 +97,7 @@ function addHistory(title, points) {
         date: new Date().toLocaleString()
     });
 
-    if (userData.history.length > 50) {
-        userData.history = userData.history.slice(0, 50);
-    }
+    userData.history = userData.history.slice(0, 50);
 
     saveData();
     renderHistory();
@@ -117,11 +109,9 @@ function renderHistory() {
     const ads = document.getElementById("ad-history-list");
     const earnings = document.getElementById("earnings-history-list");
 
-    const history = Array.isArray(userData.history)
-        ? userData.history
-        : [];
+    const history = userData.history || [];
 
-    const html = history.length > 0
+    const html = history.length
         ? history.map(item => `
             <div class="history-item">
                 <div class="h-left">
@@ -146,7 +136,7 @@ function renderHistory() {
 function watchAd() {
 
     if (typeof show_11083093 !== "function") {
-        alert("Ad not loaded yet. Try again.");
+        alert("Ad not loaded yet");
         return;
     }
 
@@ -161,17 +151,52 @@ function watchAd() {
         saveData();
         updateStats();
         updateProfileStats();
+        updateDailyProgress();
 
         alert("You earned 70 points!");
 
     }).catch(() => {
-        alert("Ad was not completed");
+        alert("Ad not completed");
     });
 }
 
 
 // ===========================
-// PROFILE STATS
+// DAILY PROGRESS
+// ===========================
+
+function updateDailyProgress() {
+
+    const target = 200;
+    const today = new Date().toDateString();
+
+    let daily = JSON.parse(localStorage.getItem("adsArenaDaily")) || {
+        date: today,
+        watched: 0
+    };
+
+    if (daily.date !== today) {
+        daily = { date: today, watched: 0 };
+    }
+
+    const percent = Math.min((daily.watched / target) * 100, 100);
+
+    const watchedEl = document.getElementById("daily-watched");
+    const targetEl = document.getElementById("daily-target");
+    const bar = document.getElementById("daily-progress-bar");
+    const pct = document.getElementById("daily-pct");
+
+    if (watchedEl) watchedEl.textContent = daily.watched;
+    if (targetEl) targetEl.textContent = target;
+    if (bar) bar.style.width = percent + "%";
+    if (pct) pct.textContent = Math.floor(percent) + "%";
+
+    localStorage.setItem("adsArenaDaily", JSON.stringify(daily));
+}
+
+
+// ===========================
+// PROFILE
 // ===========================
 
 function updateProfileStats() {
@@ -192,7 +217,7 @@ function updateProfileStats() {
 
 
 // ===========================
-// REFERRAL SYSTEM
+// REFERRAL
 // ===========================
 
 function setupReferral() {
@@ -206,17 +231,14 @@ function setupReferral() {
     if (copyBtn) {
         copyBtn.onclick = () => {
             navigator.clipboard.writeText(refLink);
-            alert("Referral link copied!");
+            alert("Copied!");
         };
     }
 
     const shareBtn = document.getElementById("share-ref-btn");
     if (shareBtn) {
         shareBtn.onclick = () => {
-            window.open(
-                "https://t.me/share/url?url=" + encodeURIComponent(refLink),
-                "_blank"
-            );
+            window.open("https://t.me/share/url?url=" + encodeURIComponent(refLink), "_blank");
         };
     }
 }
@@ -229,9 +251,9 @@ function setupReferral() {
 function setupTheme() {
 
     const toggle = document.getElementById("dark-mode-toggle");
-    const savedTheme = localStorage.getItem("theme");
+    const saved = localStorage.getItem("theme");
 
-    if (savedTheme === "light") {
+    if (saved === "light") {
         document.body.classList.add("light-mode");
         if (toggle) toggle.checked = false;
     }
@@ -246,7 +268,6 @@ function setupTheme() {
                 document.body.classList.add("light-mode");
                 localStorage.setItem("theme", "light");
             }
-
         });
     }
 }
@@ -258,37 +279,36 @@ function setupTheme() {
 
 function setupNavigation() {
 
-    document.querySelectorAll(".nav-btn").forEach(button => {
+    document.querySelectorAll(".nav-btn").forEach(btn => {
 
-        button.addEventListener("click", () => {
+        btn.addEventListener("click", () => {
 
-            const target = button.dataset.screen;
+            const target = btn.dataset.screen;
 
             document.querySelectorAll(".nav-btn")
-                .forEach(btn => btn.classList.remove("active"));
+                .forEach(b => b.classList.remove("active"));
 
-            button.classList.add("active");
+            btn.classList.add("active");
 
             document.querySelectorAll(".screen")
-                .forEach(screen => screen.classList.remove("active"));
+                .forEach(s => s.classList.remove("active"));
 
-            const targetScreen = document.getElementById("screen-" + target);
-
-            if (targetScreen) targetScreen.classList.add("active");
+            const screen = document.getElementById("screen-" + target);
+            if (screen) screen.classList.add("active");
         });
     });
 }
 
 
 // ===========================
-// BUTTON SETUP
+// BUTTONS
 // ===========================
 
 function setupButtons() {
 
-    const mainWatchBtn = document.getElementById("main-watch-btn");
-    const quickWatchBtn = document.getElementById("quick-watch-btn");
+    const main = document.getElementById("main-watch-btn");
+    const quick = document.getElementById("quick-watch-btn");
 
-    if (mainWatchBtn) mainWatchBtn.addEventListener("click", watchAd);
-    if (quickWatchBtn) quickWatchBtn.addEventListener("click", watchAd);
+    if (main) main.addEventListener("click", watchAd);
+    if (quick) quick.addEventListener("click", watchAd);
 }
