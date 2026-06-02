@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", () => {
 
     const app = document.getElementById("app");
@@ -40,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // ===========================
-// USER DATA SAFE INIT
+// SAFE USER DATA
 // ===========================
 
 let userData = {};
@@ -111,7 +110,7 @@ function renderHistory() {
 
     const history = userData.history || [];
 
-    const html = history.length
+    const html = history.length > 0
         ? history.map(item => `
             <div class="history-item">
                 <div class="h-left">
@@ -130,7 +129,7 @@ function renderHistory() {
 
 
 // ===========================
-// WATCH AD (MONETAG)
+// WATCH ADS (MONETAG + DAILY FIX)
 // ===========================
 
 function watchAd() {
@@ -142,6 +141,7 @@ function watchAd() {
 
     show_11083093().then(() => {
 
+        // GLOBAL STATS
         userData.balance += 70;
         userData.totalEarned += 70;
         userData.adsWatched += 1;
@@ -151,6 +151,23 @@ function watchAd() {
         saveData();
         updateStats();
         updateProfileStats();
+
+        // DAILY PROGRESS UPDATE
+        let today = new Date().toDateString();
+
+        let daily = JSON.parse(localStorage.getItem("adsArenaDaily")) || {
+            date: today,
+            watched: 0
+        };
+
+        if (daily.date !== today) {
+            daily = { date: today, watched: 0 };
+        }
+
+        daily.watched += 1;
+
+        localStorage.setItem("adsArenaDaily", JSON.stringify(daily));
+
         updateDailyProgress();
 
         alert("You earned 70 points!");
