@@ -92,4 +92,30 @@ document.addEventListener("DOMContentLoaded", () => {
     if (quickWatchBtn) {
         quickWatchBtn.addEventListener("click", watchAd);
     }
+});// Navigation
+
+document.querySelectorAll(".nav-btn").forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        const target = button.dataset.screen;
+
+        document.querySelectorAll(".nav-btn").forEach(btn => {
+            btn.classList.remove("active");
+        });
+
+        button.classList.add("active");
+
+        document.querySelectorAll(".screen").forEach(screen => {
+            screen.classList.remove("active");
+        });
+
+        const targetScreen =
+            document.getElementById("screen-" + target);
+
+        if (targetScreen) {
+            targetScreen.classList.add("active");
+        }
+    });
+
 });
