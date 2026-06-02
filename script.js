@@ -8,24 +8,29 @@ document.addEventListener("DOMContentLoaded", () => {
         if (app) app.style.display = "block";
     }, 2000);
 
-    if (window.Telegram && Telegram.WebApp) {
-        Telegram.WebApp.ready();
+    // Telegram user setup
+    try {
+        if (window.Telegram && Telegram.WebApp) {
+            Telegram.WebApp.ready();
 
-        const user = Telegram.WebApp.initDataUnsafe.user;
+            const user = Telegram.WebApp.initDataUnsafe?.user;
 
-        if (user) {
-            const name =
-                `${user.first_name || ""} ${user.last_name || ""}`.trim();
+            if (user) {
+                const name =
+                    `${user.first_name || ""} ${user.last_name || ""}`.trim();
 
-            const userNameEl =
-                document.getElementById("user-name");
+                const userNameEl =
+                    document.getElementById("user-name");
 
-            const profileNameEl =
-                document.getElementById("profile-name");
+                const profileNameEl =
+                    document.getElementById("profile-name");
 
-            if (userNameEl) userNameEl.textContent = name;
-            if (profileNameEl) profileNameEl.textContent = name;
+                if (userNameEl) userNameEl.textContent = name;
+                if (profileNameEl) profileNameEl.textContent = name;
+            }
         }
+    } catch (e) {
+        console.log("Telegram error:", e);
     }
 
     updateStats();
@@ -33,44 +38,37 @@ document.addEventListener("DOMContentLoaded", () => {
     updateProfileStats();
     setupReferral();
     setupTheme();
-
-    const mainWatchBtn =
-        document.getElementById("main-watch-btn");
-
-    if (mainWatchBtn) {
-        mainWatchBtn.addEventListener("click", watchAd);
-    }
-
-    const quickWatchBtn =
-        document.getElementById("quick-watch-btn");
-
-    if (quickWatchBtn) {
-        quickWatchBtn.addEventListener("click", watchAd);
-    }
-
+    setupNavigation();
+    setupButtons();
 });
 
 
 // ===========================
-// USER DATA
+// USER DATA SAFE LOAD
 // ===========================
 
-let userData =
-    JSON.parse(localStorage.getItem("adsArenaData")) || {
+let userData = {};
 
-    balance: 0,
-    totalEarned: 0,
-    adsWatched: 0,
-    history: [],
-    referrals: [],
-    refEarnings: 0
-};
+try {
+    userData = JSON.parse(localStorage.getItem("adsArenaData")) || {};
+} catch (e) {
+    userData = {};
+}
+
+userData.balance = Number(userData.balance) || 0;
+userData.totalEarned = Number(userData.totalEarned) || 0;
+userData.adsWatched = Number(userData.adsWatched) || 0;
+userData.history = Array.isArray(userData.history) ? userData.history : [];
+userData.referrals = Array.isArray(userData.referrals) ? userData.referrals : [];
+userData.refEarnings = Number(userData.refEarnings) || 0;
+
+
+// ===========================
+// SAVE DATA
+// ===========================
 
 function saveData() {
-    localStorage.setItem(
-        "adsArenaData",
-        JSON.stringify(userData)
-    );
+    localStorage.setItem("adsArenaData", JSON.stringify(userData));
 }
 
 
@@ -80,29 +78,16 @@ function saveData() {
 
 function updateStats() {
 
-    const balance =
-        document.getElementById("hero-balance");
-
+    const balance = document.getElementById("hero-balance");
     if (balance) {
-        balance.innerHTML =
-            userData.balance + " <span>PTS</span>";
+        balance.innerHTML = `${userData.balance} <span>PTS</span>`;
     }
 
-    const earnings =
-        document.getElementById("stat-earnings");
+    const earnings = document.getElementById("stat-earnings");
+    if (earnings) earnings.textContent = userData.totalEarned;
 
-    if (earnings) {
-        earnings.textContent =
-            userData.totalEarned;
-    }
-
-    const ads =
-        document.getElementById("stat-ads");
-
-    if (ads) {
-        ads.textContent =
-            userData.adsWatched;
-    }
+    const ads = document.getElementById("stat-ads");
+    if (ads) ads.textContent = userData.adsWatched;
 }
 
 
@@ -119,7 +104,7 @@ function addHistory(title, points) {
     });
 
     if (userData.history.length > 50) {
-        userData.history.length = 50;
+        userData.history = userData.history.slice(0, 50);
     }
 
     saveData();
@@ -128,27 +113,25 @@ function addHistory(title, points) {
 
 function renderHistory() {
 
-    const recent =
-        document.getElementById("recent-history");
+    const recent = document.getElementById("recent-history");
+    const ads = document.getElementById("ad-history-list");
+    const earnings = document.getElementById("earnings-history-list");
 
-    const ads =
-        document.getElementById("ad-history-list");
+    const history = Array.isArray(userData.history)
+        ? userData.history
+        : [];
 
-    const earnings =
-        document.getElementById("earnings-history-list");
-
-    const html =
-        userData.history.length > 0
-            ? userData.history.map(item => `
-                <div class="history-item">
-                    <div class="h-left">
-                        <div class="h-title">${item.title}</div>
-                        <div class="h-date">${item.date}</div>
-                    </div>
-                    <div class="h-pts">+${item.points}</div>
+    const html = history.length > 0
+        ? history.map(item => `
+            <div class="history-item">
+                <div class="h-left">
+                    <div class="h-title">${item.title || ""}</div>
+                    <div class="h-date">${item.date || ""}</div>
                 </div>
-            `).join("")
-            : `<div class="empty-msg">No history yet</div>`;
+                <div class="h-pts">+${item.points || 0}</div>
+            </div>
+        `).join("")
+        : `<div class="empty-msg">No history yet</div>`;
 
     if (recent) recent.innerHTML = html;
     if (ads) ads.innerHTML = html;
@@ -157,13 +140,13 @@ function renderHistory() {
 
 
 // ===========================
-// WATCH AD
+// WATCH AD (MONETAG)
 // ===========================
 
 function watchAd() {
 
     if (typeof show_11083093 !== "function") {
-        alert("Monetag ad not loaded");
+        alert("Ad not loaded yet. Try again.");
         return;
     }
 
@@ -182,9 +165,7 @@ function watchAd() {
         alert("You earned 70 points!");
 
     }).catch(() => {
-
         alert("Ad was not completed");
-
     });
 }
 
@@ -196,13 +177,8 @@ function watchAd() {
 function updateProfileStats() {
 
     const set = (id, value) => {
-
-        const el =
-            document.getElementById(id);
-
-        if (el) {
-            el.textContent = value;
-        }
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
     };
 
     set("pstat-balance", userData.balance);
@@ -210,23 +186,8 @@ function updateProfileStats() {
     set("pstat-ads", userData.adsWatched);
     set("pstat-refs", userData.referrals.length);
 
-    set("stat-refs", userData.referrals.length);
-
-    const refTotal =
-        document.getElementById("ref-total");
-
-    if (refTotal) {
-        refTotal.textContent =
-            userData.referrals.length;
-    }
-
-    const refEarn =
-        document.getElementById("ref-earnings");
-
-    if (refEarn) {
-        refEarn.textContent =
-            userData.refEarnings;
-    }
+    set("ref-total", userData.referrals.length);
+    set("ref-earnings", userData.refEarnings);
 }
 
 
@@ -236,40 +197,24 @@ function updateProfileStats() {
 
 function setupReferral() {
 
-    const refLink =
-        "https://t.me/Ads_Arena_Bot?start=" +
-        btoa("user_demo");
+    const refLink = "https://t.me/Ads_Arena_Bot?start=" + btoa("user_demo");
 
-    const refText =
-        document.getElementById("ref-link-text");
+    const refText = document.getElementById("ref-link-text");
+    if (refText) refText.textContent = refLink;
 
-    if (refText) {
-        refText.textContent = refLink;
-    }
-
-    const copyBtn =
-        document.getElementById("copy-ref-btn");
-
+    const copyBtn = document.getElementById("copy-ref-btn");
     if (copyBtn) {
-
         copyBtn.onclick = () => {
-
             navigator.clipboard.writeText(refLink);
-
             alert("Referral link copied!");
         };
     }
 
-    const shareBtn =
-        document.getElementById("share-ref-btn");
-
+    const shareBtn = document.getElementById("share-ref-btn");
     if (shareBtn) {
-
         shareBtn.onclick = () => {
-
             window.open(
-                "https://t.me/share/url?url=" +
-                encodeURIComponent(refLink),
+                "https://t.me/share/url?url=" + encodeURIComponent(refLink),
                 "_blank"
             );
         };
@@ -283,46 +228,23 @@ function setupReferral() {
 
 function setupTheme() {
 
-    const toggle =
-        document.getElementById("dark-mode-toggle");
-
-    const savedTheme =
-        localStorage.getItem("theme");
+    const toggle = document.getElementById("dark-mode-toggle");
+    const savedTheme = localStorage.getItem("theme");
 
     if (savedTheme === "light") {
-
         document.body.classList.add("light-mode");
-
-        if (toggle) {
-            toggle.checked = false;
-        }
+        if (toggle) toggle.checked = false;
     }
 
     if (toggle) {
-
         toggle.addEventListener("change", () => {
 
             if (toggle.checked) {
-
-                document.body.classList.remove(
-                    "light-mode"
-                );
-
-                localStorage.setItem(
-                    "theme",
-                    "dark"
-                );
-
+                document.body.classList.remove("light-mode");
+                localStorage.setItem("theme", "dark");
             } else {
-
-                document.body.classList.add(
-                    "light-mode"
-                );
-
-                localStorage.setItem(
-                    "theme",
-                    "light"
-                );
+                document.body.classList.add("light-mode");
+                localStorage.setItem("theme", "light");
             }
 
         });
@@ -334,37 +256,39 @@ function setupTheme() {
 // NAVIGATION
 // ===========================
 
-document.querySelectorAll(".nav-btn")
-.forEach(button => {
+function setupNavigation() {
 
-    button.addEventListener("click", () => {
+    document.querySelectorAll(".nav-btn").forEach(button => {
 
-        const target =
-            button.dataset.screen;
+        button.addEventListener("click", () => {
 
-        document
-            .querySelectorAll(".nav-btn")
-            .forEach(btn =>
-                btn.classList.remove("active")
-            );
+            const target = button.dataset.screen;
 
-        button.classList.add("active");
+            document.querySelectorAll(".nav-btn")
+                .forEach(btn => btn.classList.remove("active"));
 
-        document
-            .querySelectorAll(".screen")
-            .forEach(screen =>
-                screen.classList.remove("active")
-            );
+            button.classList.add("active");
 
-        const targetScreen =
-            document.getElementById(
-                "screen-" + target
-            );
+            document.querySelectorAll(".screen")
+                .forEach(screen => screen.classList.remove("active"));
 
-        if (targetScreen) {
-            targetScreen.classList.add("active");
-        }
+            const targetScreen = document.getElementById("screen-" + target);
 
+            if (targetScreen) targetScreen.classList.add("active");
+        });
     });
+}
 
-});
+
+// ===========================
+// BUTTON SETUP
+// ===========================
+
+function setupButtons() {
+
+    const mainWatchBtn = document.getElementById("main-watch-btn");
+    const quickWatchBtn = document.getElementById("quick-watch-btn");
+
+    if (mainWatchBtn) mainWatchBtn.addEventListener("click", watchAd);
+    if (quickWatchBtn) quickWatchBtn.addEventListener("click", watchAd);
+}
