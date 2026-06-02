@@ -1,784 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-   <meta name="monetag" content="fc5da47059f6fa475fa790c39f4de892">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADS ARENA</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        :root {
-            --tg-theme-bg-color: #000000;
-            --tg-theme-text-color: #ffffff;
-            --tg-theme-button-color: #1e88e5;
-            --tg-theme-button-text-color: #ffffff;
-            --tg-theme-secondary-bg-color: #111111;
-            --tg-theme-hint-color: #666666;
-            --primary-blue: #1e88e5;
-            --secondary-blue: #0d47a1;
-            --success-green: #4caf50;
-            --warning-orange: #ff9800;
-            --danger-red: #f44336;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background-color: var(--tg-theme-bg-color);
-            color: var(--tg-theme-text-color);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .container {
-            max-width: 640px;
-            margin: 0 auto;
-            padding: 16px;
-        }
-
-        .screen {
-            display: none;
-        }
-
-        .screen.active {
-            display: block;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        .header h1 {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .header p {
-            color: var(--tg-theme-hint-color);
-            font-size: 14px;
-        }
-
-        .user-info {
-            background: var(--tg-theme-secondary-bg-color);
-            padding: 20px;
-            border-radius: 16px;
-            margin-bottom: 24px;
-            border: 1px solid rgba(30, 136, 229, 0.2);
-        }
-
-        .user-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .user-name {
-            text-align: center;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 16px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 16px;
-            background: rgba(30, 136, 229, 0.1);
-            border-radius: 12px;
-        }
-
-        .stat-value {
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--primary-blue);
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: var(--tg-theme-hint-color);
-            margin-top: 4px;
-        }
-
-        .button {
-            background: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
-            border: none;
-            padding: 16px 24px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            margin-bottom: 12px;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-        }
-
-        .button:hover {
-            background: var(--secondary-blue);
-            transform: translateY(-1px);
-        }
-
-        .button:active {
-            transform: translateY(0);
-        }
-
-        .button.secondary {
-            background: var(--tg-theme-secondary-bg-color);
-            border: 1px solid var(--primary-blue);
-            color: var(--primary-blue);
-        }
-
-        .button.success {
-            background: var(--success-green);
-        }
-
-        .button.disabled {
-            background: #333;
-            color: #666;
-            cursor: not-allowed;
-        }
-
-        .card {
-            background: var(--tg-theme-secondary-bg-color);
-            padding: 20px;
-            border-radius: 16px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(30, 136, 229, 0.2);
-        }
-
-        .task-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
-            background: var(--tg-theme-secondary-bg-color);
-            border-radius: 12px;
-            margin-bottom: 12px;
-            border: 1px solid rgba(30, 136, 229, 0.2);
-        }
-
-        .task-info h3 {
-            font-size: 16px;
-            margin-bottom: 4px;
-        }
-
-        .task-info p {
-            font-size: 14px;
-            color: var(--tg-theme-hint-color);
-        }
-
-        .task-reward {
-            color: var(--primary-blue);
-            font-weight: bold;
-            font-size: 16px;
-        }
-
-        .ad-viewer {
-            width: 100%;
-            min-height: 300px;
-            background: var(--tg-theme-secondary-bg-color);
-            border-radius: 12px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            border: 2px dashed var(--primary-blue);
-        }
-
-        .ad-content {
-            text-align: center;
-            padding: 20px;
-        }
-
-        .timer {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: var(--primary-blue);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: var(--tg-theme-secondary-bg-color);
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 16px 0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--primary-blue);
-            transition: width 0.3s ease;
-        }
-
-        .referral-box {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .referral-input {
-            flex: 1;
-            padding: 12px;
-            background: var(--tg-theme-secondary-bg-color);
-            border: 1px solid var(--primary-blue);
-            border-radius: 8px;
-            color: var(--tg-theme-text-color);
-            font-size: 14px;
-        }
-
-        .copy-button {
-            background: var(--primary-blue);
-            color: white;
-            border: none;
-            padding: 12px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .leaderboard-item {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            background: var(--tg-theme-secondary-bg-color);
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-
-        .rank {
-            width: 32px;
-            height: 32px;
-            background: var(--primary-blue);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-right: 12px;
-        }
-
-        .rank.gold { background: #ffd700; color: #000; }
-        .rank.silver { background: #c0c0c0; color: #000; }
-        .rank.bronze { background: #cd7f32; color: #fff; }
-
-        .leaderboard-info {
-            flex: 1;
-        }
-
-        .leaderboard-name {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .leaderboard-count {
-            color: var(--tg-theme-hint-color);
-            font-size: 14px;
-        }
-
-        .withdrawal-form {
-            margin-bottom: 24px;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px;
-            background: var(--tg-theme-secondary-bg-color);
-            border: 1px solid var(--primary-blue);
-            border-radius: 8px;
-            color: var(--tg-theme-text-color);
-            font-size: 16px;
-        }
-
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            background: var(--tg-theme-secondary-bg-color);
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-
-        .history-info {
-            flex: 1;
-        }
-
-        .history-type {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .history-date {
-            color: var(--tg-theme-hint-color);
-            font-size: 14px;
-        }
-
-        .history-amount {
-            font-weight: bold;
-        }
-
-        .history-amount.positive {
-            color: var(--success-green);
-        }
-
-        .history-amount.negative {
-            color: var(--danger-red);
-        }
-
-        .admin-panel {
-            margin-bottom: 24px;
-        }
-
-        .admin-section {
-            margin-bottom: 32px;
-        }
-
-        .admin-section h3 {
-            margin-bottom: 16px;
-            color: var(--primary-blue);
-        }
-
-        .ad-form {
-            margin-bottom: 24px;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
-        }
-
-        .loading.active {
-            display: block;
-        }
-
-        .spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid var(--tg-theme-secondary-bg-color);
-            border-top: 3px solid var(--primary-blue);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error {
-            background: var(--danger-red);
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            text-align: center;
-        }
-
-        .success {
-            background: var(--success-green);
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            text-align: center;
-        }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--tg-theme-secondary-bg-color);
-            border-top: 1px solid rgba(30, 136, 229, 0.2);
-            padding: 8px 0;
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-        }
-
-        .nav-item {
-            text-align: center;
-            padding: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: var(--tg-theme-hint-color);
-        }
-
-        .nav-item.active {
-            color: var(--primary-blue);
-        }
-
-        .nav-icon {
-            font-size: 20px;
-            margin-bottom: 4px;
-        }
-
-        .nav-label {
-            font-size: 12px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--tg-theme-hint-color);
-        }
-
-        .empty-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-
-        @media (min-width: 768px) {
-            .container {
-                max-width: 640px;
-                margin: 0 auto;
-                padding: 24px;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-
-            .bottom-nav {
-                position: relative;
-                background: none;
-                border: none;
-                margin-top: 32px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>ADS ARENA</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-    <div class="container">
-        <!-- Dashboard Screen -->
-        <div id="dashboard" class="screen active">
-            <div class="header">
-                <h1>🎯 ADS ARENA</h1>
-                <p>Watch ads, earn coins, make money!</p>
-            </div>
-
-            <div class="user-info">
-                <div class="user-avatar" id="userAvatar">👤</div>
-                <div class="user-name" id="userName">Loading...</div>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-value" id="userBalance">0</div>
-                        <div class="stat-label">Balance</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="totalEarnings">0</div>
-                        <div class="stat-label">Total Earned</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="tasksCompleted">0</div>
-                        <div class="stat-label">Ads Watched</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="referralCount">0</div>
-                        <div class="stat-label">Referrals</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 style="margin-bottom: 16px;">🚀 Quick Actions</h3>
-                <button class="button" onclick="showScreen('tasks')">
-                    📺 Watch Ads (+10 coins each)
-                <button class="button" onclick="showScreen('tasks'); window.open('https://omg10.com/4/11050356', '_blank');">
-    📺 Watch Ads (+10 coins each)
-</button>
-                <button class="button secondary" onclick="showScreen('referrals')">
-                    👥 Invite Friends (+50 coins each)
-                </button>
-                <button class="button secondary" onclick="showScreen('withdrawal')">
-                    💰 Request Withdrawal
-                </button>
-            </div>
-
-            <div class="card">
-                <h3 style="margin-bottom: 12px;">📊 Daily Progress</h3>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span>Ads Watched Today</span>
-                    <span id="dailyProgress">0/30</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
-                </div>
-                <p style="color: var(--tg-theme-hint-color); font-size: 14px; text-align: center;">
-                    Complete all 30 ads to unlock bonus rewards!
-                </p>
-            </div>
+<body class="dark-mode">
+ 
+  <!-- SPLASH SCREEN -->
+  <div id="splash-screen">
+    <div class="splash-logo">
+      <div class="logo-ring"></div>
+      <div class="logo-ring ring2"></div>
+      <div class="logo-icon">📺</div>
+    </div>
+    <h1 class="splash-title">ADS ARENA</h1>
+    <p class="splash-sub">EARN · REFER · WITHDRAW</p>
+    <div class="splash-loader"><div class="loader-bar"></div></div>
+  </div>
+ 
+  <!-- MAIN APP -->
+  <div id="app" style="display:none;">
+ 
+    <!-- TOP HEADER -->
+    <header class="top-header">
+      <div class="header-user">
+        <div class="avatar-wrap">
+          <img id="user-avatar" src="" alt="" />
+          <span id="avatar-fallback" class="avatar-fallback"></span>
         </div>
-
-        <!-- Tasks Screen -->
-        <div id="tasks" class="screen">
-            <div class="header">
-                <h1>📺 Available Ads</h1>
-                <p>Watch ads for 15 seconds to earn 10 coins each</p>
-            </div>
-
-            <div class="loading" id="tasksLoading">
-                <div class="spinner"></div>
-                <p>Loading advertisements...</p>
-            </div>
-
-            <div id="tasksContent">
-                <div class="card">
-                    <h3 style="margin-bottom: 16px;">🎯 Today's Tasks</h3>
-                    <p style="color: var(--tg-theme-hint-color); margin-bottom: 16px;">
-                        Complete all tasks to maximize your earnings!
-                    </p>
-                    <div id="tasksList"></div>
-                </div>
-
-                <div class="empty-state" id="noTasks" style="display: none;">
-                    <div class="empty-icon">🎉</div>
-                    <h3>All Ads Completed!</h3>
-                    <p>You've watched all available ads for today. Come back tomorrow for more!</p>
-                </div>
-            </div>
+        <div class="user-info">
+          <span id="user-name" class="user-name">Loading...</span>
+          <span class="user-rank">ARENA MEMBER</span>
         </div>
-
-        <!-- Ad Viewer Screen -->
-        <div id="adViewer" class="screen">
-            <div class="header">
-                <h1>📺 Viewing Advertisement</h1>
-                <p>Stay on this page for 15 seconds to earn your reward</p>
-            </div>
-
-            <div class="ad-viewer">
-                <div class="timer" id="adTimer">15s</div>
-                <div class="ad-content" id="adContent">
-                    <div class="empty-icon">📺</div>
-                    <h3>Advertisement Loading...</h3>
-                    <p>Please wait while the ad loads</p>
-                </div>
-            </div>
-
-            <div class="progress-bar">
-                <div class="progress-fill" id="adProgress" style="width: 0%"></div>
-            </div>
-
-            <div id="adControls">
-                <button class="button disabled" id="claimButton" disabled>
-                    ⏱️ Wait 15 seconds to claim reward
-                </button>
-            </div>
+      </div>
+      <div class="header-actions">
+        <button class="theme-btn" id="theme-toggle" title="Toggle Theme">🌙</button>
+        <button class="admin-btn" id="admin-btn" title="Admin">⚙️</button>
+      </div>
+    </header>
+ 
+    <!-- BALANCE HERO -->
+    <div class="balance-hero">
+      <div class="balance-glow"></div>
+      <p class="balance-label">TOTAL BALANCE</p>
+      <h2 class="balance-amount" id="hero-balance">0 <span>PTS</span></h2>
+      <p class="balance-usd" id="hero-usd">≈ $0.00 USDT</p>
+    </div>
+ 
+    <!-- STAT CARDS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-info">
+          <span class="stat-val" id="stat-earnings">0</span>
+          <span class="stat-lbl">Total Earned</span>
         </div>
-
-        <!-- Referrals Screen -->
-        <div id="referrals" class="screen">
-            <div class="header">
-                <h1>👥 Referral Program</h1>
-                <p>Invite friends and earn 50 coins for each referral</p>
-            </div>
-
-            <div class="card">
-                <h3 style="margin-bottom: 16px;">💰 Your Referral Earnings</h3>
-                <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr);">
-                    <div class="stat-item">
-                        <div class="stat-value" id="totalReferrals">0</div>
-                        <div class="stat-label">Total Referrals</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="referralEarnings">0</div>
-                        <div class="stat-label">Coins Earned</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 style="margin-bottom: 16px;">🔗 Your Referral Link</h3>
-                <div class="referral-box">
-                    <input type="text" class="referral-input" id="referralLink" readonly>
-                    <button class="copy-button" onclick="copyReferralLink()">📋 Copy</button>
-                </div>
-                <button class="button" onclick="shareReferralLink()">
-                    📤 Share Link
-                </button>
-            </div>
-
-            <div class="card">
-                <h3 style="margin-bottom: 16px;">🏆 Top Referrers</h3>
-                <div id="leaderboard"></div>
-            </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📺</div>
+        <div class="stat-info">
+          <span class="stat-val" id="stat-ads">0</span>
+          <span class="stat-lbl">Ads Watched</span>
         </div>
-
-        <!-- Withdrawal Screen -->
-        <div id="withdrawal" class="screen">
-            <div class="header">
-                <h1>💰 Request Withdrawal</h1>
-                <p>Minimum withdrawal: 10,000 coins</p>
-            </div>
-
-            <div class="card">
-                <h3 style="margin-bottom: 16px;">💳 Current Balance</h3>
-                <div class="stat-item" style="margin-bottom: 16px;">
-                    <div class="stat-value" id="withdrawalBalance">0</div>
-                    <div class="stat-label">Available for Withdrawal</div>
-                </div>
-                
-                <div id="withdrawalEligible" style="display: none;">
-                    <div class="withdrawal-form">
-                        <div class="form-group">
-                            <label class="form-label">Withdrawal Method</label>
-                            <select class="form-input" id="withdrawalMethod">
-                                <option value="paypal">PayPal</option>
-                                <option value="bank">Bank Transfer</option>
-                                <option value="crypto">Cryptocurrency</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Account Details</label>
-                            <input type="text" class="form-input" id="accountDetails" placeholder="Enter your account details">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Amount (Coins)</label>
-                            <input type="number" class="form-input" id="withdrawalAmount" min="10000" placeholder="10000">
-                        </div>
-                        
-                        <button class="button" onclick="requestWithdrawal()">
-                            🚀 Request Withdrawal
-                        </button>
-                    </div>
-                </div>
-                
-                <div id="withdrawalNotEligible">
-                    <div class="empty-state">
-                        <div class="empty-icon">💰</div>
-                        <h3>Keep Earning!</h3>
-                        <p>You need <span id="coinsNeeded">10,000</span> more coins to request withdrawal.</p>
-                        <button class="button" onclick="showScreen('tasks')" style="margin-top: 16px;">
-                            📺 Watch More Ads
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 style="margin-bottom: 16px;">📋 Withdrawal History</h3>
-                <div id="withdrawalHistory"></div>
-            </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-info">
+          <span class="stat-val" id="stat-refs">0</span>
+          <span class="stat-lbl">Referrals</span>
         </div>
-
-        <!-- Profile Screen -->
-        <div id="profile" class="screen">
-            <div class="header">
-                <h1>👤 Profile</h1>
-                <p>Your earnings and activity history</p>
-            </div>
-
-            <div class="user-info">
-                <div class="user-avatar" id="profileAvatar">👤</div>
-                <div class="user-name" id="profileName">Loading...</div>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-value" id="profileBalance">0</div>
-                        <div class="stat-label">Current Balance</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="profileEarnings">0</div>
-                        <div class="stat-label">Total Earned</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="profileTasks">0</div>
-                        <div class="stat-label">Ads Completed</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="profileReferrals">0</div>
-                        <div class="stat-label">Referrals</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 style="margin-bottom: 16px;">📊 Earnings History</h3>
-                <div id="earningsHistory"></div>
-            </div>
-
-            <div class="card">
-                <h3 style="margin-bottom: 16px;">⚙️ Settings</h3>
-                <button class="button secondary" onclick="resetProgress()">
-                    🔄 Reset Daily Progress
-                </button>
-                <button class="button secondary" onclick="exportData()">
-                    📤 Export Data
-                </button>
-            </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-info">
+          <span class="stat-val" id="stat-rank">—</span>
+          <span class="stat-lbl">Rank</span>
         </div>
-
-        <!-- Admin Panel -->
-        <div id="admin" class="screen">
-            <div class="header">
-                <h1>⚙️ Admin Panel</h1>
-                <p>Manage advertisements and users</p>
+      </div>
+    </div>
+ 
+    <!-- NAVIGATION -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-screen="dashboard">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Home</span>
+      </button>
+      <button class="nav-btn" data-screen="watch">
+        <span class="nav-icon">📺</span>
+        <span class="nav-label">Watch</span>
+      </button>
+      <button class="nav-btn" data-screen="referral">
+        <span class="nav-icon">👥</span>
+        <span class="nav-label">Refer</span>
+      </button>
+      <button class="nav-btn" data-screen="withdraw">
+        <span class="nav-icon">💸</span>
+        <span class="nav-label">Withdraw</span>
+      </button>
+      <button class="nav-btn" data-screen="profile">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">Profile</span>
+      </button>
+    </nav>
+ 
+    <!-- SCREENS CONTAINER -->
+    <main class="screens-container">
+ 
+      <!-- ===== DASHBOARD SCREEN ===== -->
+      <section class="screen active" id="screen-dashboard">
+        <div class="screen-inner">
+ 
+          <!-- Daily Progress -->
+          <div class="section-card">
+            <div class="card-header">
+              <h3>📅 Daily Progress</h3>
+              <span class="date-badge" id="today-date"></span>
             </div>
-
-            <div class="admin-panel">
-                <div class="admin-section">
-                    <h3>📺 Advertisement Management</h3>
-                    <div class="card">
-                        <div class="ad-form">
-                            <div class="form-group">
-                                <label class="form-label">Ad Title</label>
-                                <input type="text" class="form-input" id="adTitle" placeholder="Enter ad title">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Ad Description</label>
-                                <input type="text" class="form-input" id="adDescription" placeholder="Enter ad description">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Ad URL</label>
-                                <input type="url" class="form-input" id="adUrl" placeholder="https://example.com">
-                            </div>
+            <div class="progress-info">
+              <span id="daily-watched">0</span> / <span id="daily-target">200</span> Ads
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="daily-progress-bar"></div>
+            </div>
+            <div class="progress-footer">
+              <span id="daily-pct">0%</span>
+              <span id="daily-bonus-msg" class="bonus-msg">Keep watching to earn bonuses!</span>
+            </div>
+          </div>
+ 
+          <!-- Quick Watch Button -->
+          <button class="watch-cta" id="quick-watch-btn">
+            <span class="watch-cta-icon">📺</span>
+            <span class="watch-cta-text">
+              <strong>Watch Ads</strong>
+              <small>+70 Points per view</small>
+            </span>
+            <span class="watch-cta-arrow">→</span>
+          </button>
+ 
+          <!-- Recent History -->
+          <div class="section-card">
+            <div class="card-header">
+              <h3>🕓 Recent Activity</h3>
+              <button class="link-btn" id="view-all-history">View All</button>
+            </div>
+            <div class="history-list" id="recent-history">
+              <p class="empty-msg">No activity yet. Start watching ads!</p>
+            </div>
+          </div>
+ 
+        </div>
+      </section>
+ 
+      <!-- ===== WATCH ADS SCREEN ===== -->
+      <section class="screen" id="screen-watch">
+        <div class="screen-inner">
+ 
+          <div class="watch-hero">
+            <div class="watch-tv-icon">📺</div>
+            <h2>Watch & Earn</h2>
+            <p>Watch ads and earn <strong>70 Points</strong> each time</p>
+          </div>
+ 
+          <div class="section-card rewards-card">
+            <div class="reward-row">
+              <span>Per Ad View</span>
+              <strong>+70 PTS</strong>
+            </div>
+            <div class="reward-row">
+              <span>Daily Target</span>
+              <strong>200 Ads</strong>
+            </div>
+            <div class="reward-row">
+              <span>Daily Max Earn</span>
+              <strong>14,000 PTS</strong>
+            </div>
+          </div>
+ 
+          <button class="main-watch-btn" id="main-watch-btn">
+            <span class="btn-pulse"></span>
+            📺 Watch Ads &nbsp;<span class="pts-badge">+70 PTS</span>
+          </button>
+ 
+          <div class="timer-box" id="timer-box" style="display:none;">
+            <div class="timer-ring">
+              <svg viewBox="0 0 60 60">
+                <circle class="ring-bg" cx="30" cy="30" r="26"/>
+                <circle class="ring-fill" id="ring-fill" cx="30" cy="30" r="26"/>
+              </svg>
+              <span id="timer-count">15</span>
+            </div>
+            <p>Ad playing... <br>Reward in <span id="timer-sec">15</span>s</p>
+          </div>
+ 
+          <!-- Ad History -->
+          <div class="section-card">
+            <div class="card-header"><h3>📋 Ad History</h3></div>
+            <div class="history-list" id="ad-history-list">
+              <p class="empty-msg">No ads watched yet.</p>
+            </div>
+          </div>
+ 
+        </div>
+      </section>
+ 
+      <!-- ===== REFERRAL SCREEN ===== -->
+      <section class="screen" id="screen-referral">
+        <div class="screen-inner">
+ 
+          <div class="section-card ref-stats-card">
+            <h3>👥 Referral Stats</h3>
+            <div class="ref-stats-grid">
+              <div class="ref-stat">
+                <span class="ref-stat-val" id="ref-total">0</span>
+                <span class="ref-stat-lbl">Total Refs</span>
+              </div>
+              <div class="ref-stat">
+                <span class="ref-stat-val" id="ref-earnings">0</span>
+                <span class="ref-stat-lbl">Ref Earnings</span>
+              </div>
+              <div class="ref-stat">
+                <span class="ref-stat-val">50</span>
+                <span class="ref-stat-lbl">Per Referral</span>
+              </div>
+            </div>
+          </div>
+ 
+          <div class="section-card">
+            <h3>🔗 Your Referral Link</h3>
+            <div class="ref-link-box">
+              <span id="ref-link-text" class="ref-link-text">Loading...</span>
+            </div>
+            <div class="ref-btns">
+              <button class="ref-action-btn copy-btn" id="copy-ref-btn">📋 Copy Link</button>
+              <button class="ref-action-btn share-btn" id="share-ref-btn">📤 Share Link</button>
+            </div>
+          </div>
+ 
+          <!-- Leaderboard -->
+          <div class="section-card">
+            <div class="card-header">
+              <h3>🏆 Leaderboard</h3>
+            </div>
+            <div class="leaderboard-list" id="leaderboard-list">
+              <p class="empty-msg">Be the first to refer friends!</p>
+            </div>
+          </div>
+ 
+          <!-- Referral History -->
+          <div class="section-card">
+            <div class="card-header"><h3>📜 Referral History</h3></div>
+            <div class="history-list" id="ref-history-list">
+              <p class="empty-msg">No referrals yet.</p>
+            </div>
+          </div>
+ 
+        </div>
+      </section>
+ 
+      <!-- ===== WITHDRAW SCREEN ===== -->
+      <section class="screen" id="screen-withdraw">
+        <div class="screen-inner">
+ 
+          <div class="withdraw-hero">
+            <div class="withdraw-info-card">
+              <div class="withdraw-rate">
+                <span class="rate-pts">100,000 PTS</span>
+                <span class="rate-eq">=</span>
+                <span class="rate-usd">$5 USDT</span>
+              </div>
+              <p class="withdraw-note">Minimum withdrawal: 100,000 Points</p>
+            </div>
+          </div>
+ 
+          <div class="balance-status-card section-card">
+            <p>Your Balance: <strong id="withdraw-balance">0 PTS</strong></p>
+            <div class="withdraw-progress-track">
+              <div class="withdraw-progress-fill" id="withdraw-progress-fill"></div>
+            </div>
+            <p class="withdraw-progress-label" id="withdraw-progress-label">0 / 100,000 PTS</p>
+          </div>
+ 
+          <div id="exchange-section">
+            <button class="exchange-btn" id="exchange-btn" disabled>
+              💱 Exchange Points
+            </button>
+          </div>
+ 
+          <!-- Withdraw Form -->
+          <div class="section-card withdraw-form-card" id="withdraw-form-card" style="display:none;">
+            <h3>💸 Withdrawal Request</h3>
+            <div class="form-group">
+              <label>Wallet Address</label>
+              <input type="text" id="wallet-address" placeholder="Enter your wallet address" />
+            </div>
+            <div class="form-group">
+              <label>Amount (USDT)</label>
+              <input type="number" id="withdraw-amount" placeholder="Min $5" min="5" />
+            </div>
+            <div class="form-group">
+              <label>Crypto Type</label>
+              <select id="crypto-type">
+                <option value="USDT_TRC20">USDT TRC20</option>
+                <option value="USDT_BEP20">USDT BEP20</option>
+              </select>
+            </div>
+            <button class="submit-withdraw-btn" id="submit-withdraw-btn">Submit Withdrawal</button>
+          </div>
+ 
+          <!-- Withdrawal History -->
+          <div class="section-card">
+            <div class="card-header"><h3>📋 Withdrawal History</h3></div>
+            <div class="history-list" id="withdraw-history-list">
+              <p class="empty-msg">No withdrawals yet.</p>
+            </div>
+          </div>
+ 
+        </div>
+      </section>
+ 
+      <!-- ===== PROFILE SCREEN ===== -->
+      <section class="screen" id="screen-profile">
+        <div class="screen-inner">
+ 
+          <div class="profile-hero">
+            <div class="profile-avatar-wrap">
+              <img id="profile-avatar" src="" alt="" />
+              <span id="profile-avatar-fallback" class="avatar-fallback large"></span>
+            </div>
+            <h2 id="profile-name">—</h2>
+            <span class="profile-badge">ARENA MEMBER</span>
+          </div>
+ 
+          <div class="stats-grid section-card">
+            <div class="profile-stat">
+              <span class="pstat-val" id="pstat-balance">0</span>
+              <span class="pstat-lbl">Balance</span>
+            </div>
+            <div class="profile-stat">
+              <span class="pstat-val" id="pstat-total">0</span>
+              <span class="pstat-lbl">Total Earned</span>
+            </div>
+            <div class="profile-stat">
+              <span class="pstat-val" id="pstat-ads">0</span>
+              <span class="pstat-lbl">Ads Watched</span>
+            </div>
+            <div class="profile-stat">
+              <span class="pstat-val" id="pstat-refs">0</span>
+              <span class="pstat-lbl">Referrals</span>
+            </div>
+          </div>
+ 
+          <!-- Earnings History -->
+          <div class="section-card">
+            <div class="card-header"><h3>💰 Earnings History</h3></div>
+            <div class="history-list" id="earnings-history-list">
+              <p class="empty-msg">No earnings yet.</p>
+            </div>
+          </div>
+ 
+          <!-- Settings -->
+          <div class="section-card settings-card">
+            <h3>⚙️ Settings</h3>
+            <div class="setting-row">
+              <span>Dark Mode</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="dark-mode-toggle" checked />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="setting-row">
+              <span>Reset Daily Progress</span>
+              <button class="danger-btn" id="reset-daily-btn">Reset</button>
+            </div>
+            <div class="setting-row">
+              <span>Clear All Data</span>
+              <button class="danger-btn" id="clear-data-btn">Clear</button>
+            </div>
+          </div>
+ 
+        </div>
+      </section>
+ 
+    </main>
+ 
+  </div><!-- /#app -->
+ 
+  <!-- ADMIN PANEL OVERLAY -->
+  <div id="admin-panel" class="admin-overlay" style="display:none;">
+    <div class="admin-container">
+      <div class="admin-header">
+        <h2>⚙️ Admin Panel</h2>
+        <button id="close-admin-btn" class="close-btn">✕</button>
+      </div>
+ 
+      <!-- Admin Login -->
+      <div id="admin-login" class="admin-section">
+        <h3>Admin Login</h3>
+        <div class="form-group">
+          <input type="password" id="admin-password" placeholder="Enter admin password" />
+        </div>
+        <button class="submit-withdraw-btn" id="admin-login-btn">Login</button>
+      </div>
+ 
+      <!-- Admin Dashboard -->
+      <div id="admin-dashboard" class="admin-section" style="display:none;">
+        <div class="admin-tabs">
+          <button class="admin-tab active" data-tab="ads">📢 Ads</button>
+          <button class="admin-tab" data-tab="users">👥 Users</button>
+          <button class="admin-tab" data-tab="withdrawals">💸 Withdrawals</button>
+        </div>
+ 
+        <!-- Ads Management -->
+        <div class="admin-tab-content active" id="admin-tab-ads">
+          <button class="submit-withdraw-btn" id="add-ad-btn" style="margin-bottom:12px;">+ Add Advertisement</button>
+          <div id="ads-management-list"></div>
+          <div class="ad-form" id="ad-form" style="display:none;">
+            <h4 id="ad-form-title">Add Advertisement</h4>
+            <div class="form-group"><label>Title</label><input type="text" id="ad-title" placeholder="Ad Title"/></div>
+            <div class="form-group"><label>Description</label><input type="text" id="ad-desc" placeholder="Description"/></div>
+            <div class="form-group"><label>URL</label><input type="text" id="ad-url" placeholder="https://..."/></div>
+            <div class="form-group"><label>Reward Points</label><input type="number" id="ad-reward" placeholder="70"/></div>
+            <button class="submit-withdraw-btn" id="save-ad-btn">Save Ad</button>
+            <button class="danger-btn" id="cancel-ad-btn" style="margin-top:8px;">Cancel</button>
+          </div>
+        </div>
+ 
+        <!-- Users -->
+        <div class="admin-tab-content" id="admin-tab-users">
+          <div class="form-group"><input type="text" id="user-search" placeholder="Search users..."/></div>
+          <div id="users-list"></div>
+        </div>
+ 
+        <!-- Withdrawals -->
+        <div class="admin-tab-content" id="admin-tab-withdrawals">
+          <div id="withdrawals-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="toast"></div>
+ 
+  <script src="script.js"></script>
+</body>
+</html>
+ 
