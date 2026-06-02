@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+
     const app = document.getElementById("app");
     const splash = document.getElementById("splash-screen");
 
@@ -13,73 +14,25 @@ document.addEventListener("DOMContentLoaded", () => {
         const user = Telegram.WebApp.initDataUnsafe.user;
 
         if (user) {
-            const name = `${user.first_name || ""} ${user.last_name || ""}`.trim();
+            const name =
+                `${user.first_name || ""} ${user.last_name || ""}`.trim();
 
-            const userNameEl = document.getElementById("user-name");
-            const profileNameEl = document.getElementById("profile-name");
+            const userNameEl =
+                document.getElementById("user-name");
+
+            const profileNameEl =
+                document.getElementById("profile-name");
 
             if (userNameEl) userNameEl.textContent = name;
             if (profileNameEl) profileNameEl.textContent = name;
         }
     }
-});// ADS ARENA DATA
-
-let userData = JSON.parse(localStorage.getItem("adsArenaData")) || {
-    balance: 0,
-    totalEarned: 0,
-    adsWatched: 0
-};
-
-function saveData() {
-    localStorage.setItem(
-        "adsArenaData",
-        JSON.stringify(userData)
-    );
-}
-
-function updateStats() {
-
-    const balance = document.getElementById("hero-balance");
-    if (balance) {
-        balance.innerHTML = userData.balance + " <span>PTS</span>";
-    }
-
-    const earnings = document.getElementById("stat-earnings");
-    if (earnings) {
-        earnings.textContent = userData.totalEarned;
-    }
-
-    const ads = document.getElementById("stat-ads");
-    if (ads) {
-        ads.textContent = userData.adsWatched;
-    }
-}
-
-function watchAd() {
-
-    if (typeof show_11083093 !== "function") {
-        alert("Monetag ad not loaded");
-        return;
-    }
-
-    show_11083093().then(() => {
-
-        userData.balance += 70;
-        userData.totalEarned += 70;
-        userData.adsWatched += 1;
-
-        addHistory("Watched Monetag Ad", 70);
-        
-        saveData();
-        updateStats();
-
-        alert("You earned 70 points!");
-    });
-}
-
-document.addEventListener("DOMContentLoaded", () => {
 
     updateStats();
+    renderHistory();
+    updateProfileStats();
+    setupReferral();
+    setupTheme();
 
     const mainWatchBtn =
         document.getElementById("main-watch-btn");
@@ -94,39 +47,71 @@ document.addEventListener("DOMContentLoaded", () => {
     if (quickWatchBtn) {
         quickWatchBtn.addEventListener("click", watchAd);
     }
-});// Navigation
 
-document.querySelectorAll(".nav-btn").forEach(button => {
+});
 
-    button.addEventListener("click", () => {
 
-        const target = button.dataset.screen;
+// ===========================
+// USER DATA
+// ===========================
 
-        document.querySelectorAll(".nav-btn").forEach(btn => {
-            btn.classList.remove("active");
-        });
+let userData =
+    JSON.parse(localStorage.getItem("adsArenaData")) || {
 
-        button.classList.add("active");
+    balance: 0,
+    totalEarned: 0,
+    adsWatched: 0,
+    history: [],
+    referrals: [],
+    refEarnings: 0
+};
 
-        document.querySelectorAll(".screen").forEach(screen => {
-            screen.classList.remove("active");
-        });
+function saveData() {
+    localStorage.setItem(
+        "adsArenaData",
+        JSON.stringify(userData)
+    );
+}
 
-        const targetScreen =
-            document.getElementById("screen-" + target);
 
-        if (targetScreen) {
-            targetScreen.classList.add("active");
-        }
-    });
+// ===========================
+// UPDATE STATS
+// ===========================
 
-});// Extra ADS ARENA Features
+function updateStats() {
 
-if (!userData.history) userData.history = [];
-if (!userData.referrals) userData.referrals = [];
-if (!userData.refEarnings) userData.refEarnings = 0;
+    const balance =
+        document.getElementById("hero-balance");
+
+    if (balance) {
+        balance.innerHTML =
+            userData.balance + " <span>PTS</span>";
+    }
+
+    const earnings =
+        document.getElementById("stat-earnings");
+
+    if (earnings) {
+        earnings.textContent =
+            userData.totalEarned;
+    }
+
+    const ads =
+        document.getElementById("stat-ads");
+
+    if (ads) {
+        ads.textContent =
+            userData.adsWatched;
+    }
+}
+
+
+// ===========================
+// HISTORY
+// ===========================
 
 function addHistory(title, points) {
+
     userData.history.unshift({
         title,
         points,
@@ -143,32 +128,81 @@ function addHistory(title, points) {
 
 function renderHistory() {
 
-    const recent = document.getElementById("recent-history");
-    const ads = document.getElementById("ad-history-list");
-    const earnings = document.getElementById("earnings-history-list");
+    const recent =
+        document.getElementById("recent-history");
 
-    const html = userData.history.length
-        ? userData.history.map(item => `
-            <div class="history-item">
-                <div class="h-left">
-                    <div class="h-title">${item.title}</div>
-                    <div class="h-date">${item.date}</div>
+    const ads =
+        document.getElementById("ad-history-list");
+
+    const earnings =
+        document.getElementById("earnings-history-list");
+
+    const html =
+        userData.history.length > 0
+            ? userData.history.map(item => `
+                <div class="history-item">
+                    <div class="h-left">
+                        <div class="h-title">${item.title}</div>
+                        <div class="h-date">${item.date}</div>
+                    </div>
+                    <div class="h-pts">+${item.points}</div>
                 </div>
-                <div class="h-pts">+${item.points}</div>
-            </div>
-        `).join("")
-        : `<p class="empty-msg">No history yet.</p>`;
+            `).join("")
+            : `<div class="empty-msg">No history yet</div>`;
 
     if (recent) recent.innerHTML = html;
     if (ads) ads.innerHTML = html;
     if (earnings) earnings.innerHTML = html;
 }
 
+
+// ===========================
+// WATCH AD
+// ===========================
+
+function watchAd() {
+
+    if (typeof show_11083093 !== "function") {
+        alert("Monetag ad not loaded");
+        return;
+    }
+
+    show_11083093().then(() => {
+
+        userData.balance += 70;
+        userData.totalEarned += 70;
+        userData.adsWatched += 1;
+
+        addHistory("Watched Monetag Ad", 70);
+
+        saveData();
+        updateStats();
+        updateProfileStats();
+
+        alert("You earned 70 points!");
+
+    }).catch(() => {
+
+        alert("Ad was not completed");
+
+    });
+}
+
+
+// ===========================
+// PROFILE STATS
+// ===========================
+
 function updateProfileStats() {
 
-    const set = (id,val)=>{
-        const el=document.getElementById(id);
-        if(el) el.textContent=val;
+    const set = (id, value) => {
+
+        const el =
+            document.getElementById(id);
+
+        if (el) {
+            el.textContent = value;
+        }
     };
 
     set("pstat-balance", userData.balance);
@@ -178,70 +212,159 @@ function updateProfileStats() {
 
     set("stat-refs", userData.referrals.length);
 
-    const refTotal=document.getElementById("ref-total");
-    if(refTotal) refTotal.textContent=userData.referrals.length;
+    const refTotal =
+        document.getElementById("ref-total");
 
-    const refEarn=document.getElementById("ref-earnings");
-    if(refEarn) refEarn.textContent=userData.refEarnings;
+    if (refTotal) {
+        refTotal.textContent =
+            userData.referrals.length;
+    }
+
+    const refEarn =
+        document.getElementById("ref-earnings");
+
+    if (refEarn) {
+        refEarn.textContent =
+            userData.refEarnings;
+    }
 }
+
+
+// ===========================
+// REFERRAL SYSTEM
+// ===========================
 
 function setupReferral() {
 
     const refLink =
-      "https://t.me/Ads_Arena_Bot?start=" +
-      btoa("user_" + Date.now());
+        "https://t.me/Ads_Arena_Bot?start=" +
+        btoa("user_demo");
 
-    const refText=document.getElementById("ref-link-text");
-    if(refText) refText.textContent=refLink;
+    const refText =
+        document.getElementById("ref-link-text");
 
-    const copyBtn=document.getElementById("copy-ref-btn");
+    if (refText) {
+        refText.textContent = refLink;
+    }
 
-    if(copyBtn){
-        copyBtn.onclick=()=>{
+    const copyBtn =
+        document.getElementById("copy-ref-btn");
+
+    if (copyBtn) {
+
+        copyBtn.onclick = () => {
+
             navigator.clipboard.writeText(refLink);
+
             alert("Referral link copied!");
         };
     }
 
-    const shareBtn=document.getElementById("share-ref-btn");
+    const shareBtn =
+        document.getElementById("share-ref-btn");
 
-    if(shareBtn){
-        shareBtn.onclick=()=>{
+    if (shareBtn) {
+
+        shareBtn.onclick = () => {
+
             window.open(
-              "https://t.me/share/url?url=" +
-              encodeURIComponent(refLink),
-              "_blank"
+                "https://t.me/share/url?url=" +
+                encodeURIComponent(refLink),
+                "_blank"
             );
         };
     }
 }
 
+
+// ===========================
+// THEME
+// ===========================
+
 function setupTheme() {
 
     const toggle =
-      document.getElementById("dark-mode-toggle");
+        document.getElementById("dark-mode-toggle");
 
     const savedTheme =
-      localStorage.getItem("theme");
+        localStorage.getItem("theme");
 
-    if(savedTheme==="light"){
+    if (savedTheme === "light") {
+
         document.body.classList.add("light-mode");
-        if(toggle) toggle.checked=false;
+
+        if (toggle) {
+            toggle.checked = false;
+        }
     }
 
-    if(toggle){
-        toggle.addEventListener("change",()=>{
+    if (toggle) {
 
-            if(toggle.checked){
-                document.body.classList.remove("light-mode");
-                localStorage.setItem("theme","dark");
-            }else{
-                document.body.classList.add("light-mode");
-                localStorage.setItem("theme","light");
+        toggle.addEventListener("change", () => {
+
+            if (toggle.checked) {
+
+                document.body.classList.remove(
+                    "light-mode"
+                );
+
+                localStorage.setItem(
+                    "theme",
+                    "dark"
+                );
+
+            } else {
+
+                document.body.classList.add(
+                    "light-mode"
+                );
+
+                localStorage.setItem(
+                    "theme",
+                    "light"
+                );
             }
-renderHistory();
-updateProfileStats();
-setupReferral();
-setupTheme();
+
         });
-    
+    }
+}
+
+
+// ===========================
+// NAVIGATION
+// ===========================
+
+document.querySelectorAll(".nav-btn")
+.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        const target =
+            button.dataset.screen;
+
+        document
+            .querySelectorAll(".nav-btn")
+            .forEach(btn =>
+                btn.classList.remove("active")
+            );
+
+        button.classList.add("active");
+
+        document
+            .querySelectorAll(".screen")
+            .forEach(screen =>
+                screen.classList.remove("active")
+            );
+
+        const targetScreen =
+            document.getElementById(
+                "screen-" + target
+            );
+
+        if (targetScreen) {
+            targetScreen.classList.add("active");
+        }
+
+    });
+
+});
