@@ -22,4 +22,74 @@ document.addEventListener("DOMContentLoaded", () => {
             if (profileNameEl) profileNameEl.textContent = name;
         }
     }
+});// ADS ARENA DATA
+
+let userData = JSON.parse(localStorage.getItem("adsArenaData")) || {
+    balance: 0,
+    totalEarned: 0,
+    adsWatched: 0
+};
+
+function saveData() {
+    localStorage.setItem(
+        "adsArenaData",
+        JSON.stringify(userData)
+    );
+}
+
+function updateStats() {
+
+    const balance = document.getElementById("hero-balance");
+    if (balance) {
+        balance.innerHTML = userData.balance + " <span>PTS</span>";
+    }
+
+    const earnings = document.getElementById("stat-earnings");
+    if (earnings) {
+        earnings.textContent = userData.totalEarned;
+    }
+
+    const ads = document.getElementById("stat-ads");
+    if (ads) {
+        ads.textContent = userData.adsWatched;
+    }
+}
+
+function watchAd() {
+
+    if (typeof show_11083093 !== "function") {
+        alert("Monetag ad not loaded");
+        return;
+    }
+
+    show_11083093().then(() => {
+
+        userData.balance += 70;
+        userData.totalEarned += 70;
+        userData.adsWatched += 1;
+
+        saveData();
+        updateStats();
+
+        alert("You earned 70 points!");
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    updateStats();
+
+    const mainWatchBtn =
+        document.getElementById("main-watch-btn");
+
+    if (mainWatchBtn) {
+        mainWatchBtn.addEventListener("click", watchAd);
+    }
+
+    const quickWatchBtn =
+        document.getElementById("quick-watch-btn");
+
+    if (quickWatchBtn) {
+        quickWatchBtn.addEventListener("click", watchAd);
+    }
 });
