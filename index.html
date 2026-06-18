@@ -1,457 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
-<script src='//libtl.com/sdk.js'
-        data-zone='11083093'
-        data-sdk='show_11083093'></script>
-  <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<head>
+  <meta charset="UTF-8">
   <title>ADS ARENA</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+
+  <script src="//telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- MONETAG (UNCHANGED) -->
+  <script src='//libtl.com/sdk.js'
+          data-zone='11083093'
+          data-sdk='show_11083093'></script>
 </head>
-<body class="dark-mode">
- 
-  <!-- SPLASH SCREEN -->
-  <div id="splash-screen">
-    <div class="splash-logo">
-      <div class="logo-ring"></div>
-      <div class="logo-ring ring2"></div>
-      <div class="logo-icon">📺</div>
+
+<body>
+
+<div id="app">
+
+  <!-- HOME -->
+  <section id="screen-home" class="screen active">
+
+    <div class="top">
+      <img id="user-photo" src="https://i.imgur.com/placeholder.png">
+      <h2 id="user-name">User</h2>
     </div>
-    <h1 class="splash-title">ADS ARENA</h1>
-    <p class="splash-sub">EARN · REFER · WITHDRAW</p>
-    <div class="splash-loader"><div class="loader-bar"></div></div>
-  </div>
- 
-  <!-- MAIN APP -->
-  <div id="app" style="display:none;">
- 
-    <!-- TOP HEADER -->
-    <header class="top-header">
-      <div class="header-user">
-        <div class="avatar-wrap">
-          <img id="user-avatar" src="" alt="" />
-          <span id="avatar-fallback" class="avatar-fallback"></span>
-        </div>
-        <div class="user-info">
-          <span id="user-name" class="user-name">Loading...</span>
-          <span class="user-rank">ARENA MEMBER</span>
-        </div>
-      </div>
-      <div class="header-actions">
-        <button class="theme-btn" id="theme-toggle" title="Toggle Theme">🌙</button>
-        <button class="admin-btn" id="admin-btn" title="Admin">⚙️</button>
-      </div>
-    </header>
- 
-    <!-- BALANCE HERO -->
-    <div class="balance-hero">
-      <div class="balance-glow"></div>
-      <p class="balance-label">TOTAL BALANCE</p>
-      <h2 class="balance-amount" id="hero-balance">0 <span>PTS</span></h2>
-      <p class="balance-usd" id="hero-usd">≈ $0.00 USDT</p>
+
+    <div class="card">
+      <h3>Ads Watched</h3>
+      <p id="ads-watched">0</p>
     </div>
- 
-    <!-- STAT CARDS -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-icon">💰</div>
-        <div class="stat-info">
-          <span class="stat-val" id="stat-earnings">0</span>
-          <span class="stat-lbl">Total Earned</span>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">📺</div>
-        <div class="stat-info">
-          <span class="stat-val" id="stat-ads">0</span>
-          <span class="stat-lbl">Ads Watched</span>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">👥</div>
-        <div class="stat-info">
-          <span class="stat-val" id="stat-refs">0</span>
-          <span class="stat-lbl">Referrals</span>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">🏆</div>
-        <div class="stat-info">
-          <span class="stat-val" id="stat-rank">—</span>
-          <span class="stat-lbl">Rank</span>
-        </div>
-      </div>
+
+    <div class="card">
+      <h3>Referrals</h3>
+      <p id="ref-count">0</p>
     </div>
- 
-    <!-- NAVIGATION -->
-    <nav class="bottom-nav">
-      <button class="nav-btn active" data-screen="dashboard">
-        <span class="nav-icon">🏠</span>
-        <span class="nav-label">Home</span>
-      </button>
-      <button class="nav-btn" data-screen="watch">
-        <span class="nav-icon">📺</span>
-        <span class="nav-label">Watch</span>
-      </button>
-      <button class="nav-btn" data-screen="referral">
-        <span class="nav-icon">👥</span>
-        <span class="nav-label">Refer</span>
-      </button>
-      <button class="nav-btn" data-screen="withdraw">
-        <span class="nav-icon">💸</span>
-        <span class="nav-label">Withdraw</span>
-      </button>
-      <button class="nav-btn" data-screen="profile">
-        <span class="nav-icon">👤</span>
-        <span class="nav-label">Profile</span>
-      </button>
-    </nav>
- 
-    <!-- SCREENS CONTAINER -->
-    <main class="screens-container">
- 
-      <!-- ===== DASHBOARD SCREEN ===== -->
-      <section class="screen active" id="screen-dashboard">
-        <div class="screen-inner">
- 
-          <!-- Daily Progress -->
-          <div class="section-card">
-            <div class="card-header">
-              <h3>📅 Daily Progress</h3>
-              <span class="date-badge" id="today-date"></span>
-            </div>
-            <div class="progress-info">
-              <span id="daily-watched">0</span> / <span id="daily-target">200</span> Ads
-            </div>
-            <div class="progress-track">
-              <div class="progress-fill" id="daily-progress-bar"></div>
-            </div>
-            <div class="progress-footer">
-              <span id="daily-pct">0%</span>
-              <span id="daily-bonus-msg" class="bonus-msg">Keep watching to earn bonuses!</span>
-            </div>
-          </div>
- 
-          <!-- Quick Watch Button -->
-          <button class="watch-cta" id="quick-watch-btn">
-            <span class="watch-cta-icon">📺</span>
-            <span class="watch-cta-text">
-              <strong>Watch Ads</strong>
-              <small>+70 Points per view</small>
-            </span>
-            <span class="watch-cta-arrow">→</span>
-          </button>
- 
-          <!-- Recent History -->
-          <div class="section-card">
-            <div class="card-header">
-              <h3>🕓 Recent Activity</h3>
-              <button class="link-btn" id="view-all-history">View All</button>
-            </div>
-            <div class="history-list" id="recent-history">
-              <p class="empty-msg">No activity yet. Start watching ads!</p>
-            </div>
-          </div>
- 
-        </div>
-      </section>
- 
-      <!-- ===== WATCH ADS SCREEN ===== -->
-      <section class="screen" id="screen-watch">
-        <div class="screen-inner">
- 
-          <div class="watch-hero">
-            <div class="watch-tv-icon">📺</div>
-            <h2>Watch & Earn</h2>
-            <p>Watch ads and earn <strong>70 Points</strong> each time</p>
-          </div>
- 
-          <div class="section-card rewards-card">
-            <div class="reward-row">
-              <span>Per Ad View</span>
-              <strong>+70 PTS</strong>
-            </div>
-            <div class="reward-row">
-              <span>Daily Target</span>
-              <strong>200 Ads</strong>
-            </div>
-            <div class="reward-row">
-              <span>Daily Max Earn</span>
-              <strong>14,000 PTS</strong>
-            </div>
-          </div>
- 
-          <button class="main-watch-btn" id="main-watch-btn">
-            <span class="btn-pulse"></span>
-            📺 Watch Ads &nbsp;<span class="pts-badge">+70 PTS</span>
-          </button>
- 
-          <div class="timer-box" id="timer-box" style="display:none;">
-            <div class="timer-ring">
-              <svg viewBox="0 0 60 60">
-                <circle class="ring-bg" cx="30" cy="30" r="26"/>
-                <circle class="ring-fill" id="ring-fill" cx="30" cy="30" r="26"/>
-              </svg>
-              <span id="timer-count">15</span>
-            </div>
-            <p>Ad playing... <br>Reward in <span id="timer-sec">15</span>s</p>
-          </div>
- 
-          <!-- Ad History -->
-          <div class="section-card">
-            <div class="card-header"><h3>📋 Ad History</h3></div>
-            <div class="history-list" id="ad-history-list">
-              <p class="empty-msg">No ads watched yet.</p>
-            </div>
-          </div>
- 
-        </div>
-      </section>
- 
-      <!-- ===== REFERRAL SCREEN ===== -->
-      <section class="screen" id="screen-referral">
-        <div class="screen-inner">
- 
-          <div class="section-card ref-stats-card">
-            <h3>👥 Referral Stats</h3>
-            <div class="ref-stats-grid">
-              <div class="ref-stat">
-                <span class="ref-stat-val" id="ref-total">0</span>
-                <span class="ref-stat-lbl">Total Refs</span>
-              </div>
-              <div class="ref-stat">
-                <span class="ref-stat-val" id="ref-earnings">0</span>
-                <span class="ref-stat-lbl">Ref Earnings</span>
-              </div>
-              <div class="ref-stat">
-                <span class="ref-stat-val">50</span>
-                <span class="ref-stat-lbl">Per Referral</span>
-              </div>
-            </div>
-          </div>
- 
-          <div class="section-card">
-            <h3>🔗 Your Referral Link</h3>
-            <div class="ref-link-box">
-              <span id="ref-link-text" class="ref-link-text">Loading...</span>
-            </div>
-            <div class="ref-btns">
-              <button class="ref-action-btn copy-btn" id="copy-ref-btn">📋 Copy Link</button>
-              <button class="ref-action-btn share-btn" id="share-ref-btn">📤 Share Link</button>
-            </div>
-          </div>
- 
-          <!-- Leaderboard -->
-          <div class="section-card">
-            <div class="card-header">
-              <h3>🏆 Leaderboard</h3>
-            </div>
-            <div class="leaderboard-list" id="leaderboard-list">
-              <p class="empty-msg">Be the first to refer friends!</p>
-            </div>
-          </div>
- 
-          <!-- Referral History -->
-          <div class="section-card">
-            <div class="card-header"><h3>📜 Referral History</h3></div>
-            <div class="history-list" id="ref-history-list">
-              <p class="empty-msg">No referrals yet.</p>
-            </div>
-          </div>
- 
-        </div>
-      </section>
- 
-      <!-- ===== WITHDRAW SCREEN ===== -->
-      <section class="screen" id="screen-withdraw">
-        <div class="screen-inner">
- 
-          <div class="withdraw-hero">
-            <div class="withdraw-info-card">
-              <div class="withdraw-rate">
-                <span class="rate-pts">100,000 PTS</span>
-                <span class="rate-eq">=</span>
-                <span class="rate-usd">$5 USDT</span>
-              </div>
-              <p class="withdraw-note">Minimum withdrawal: 100,000 Points</p>
-            </div>
-          </div>
- 
-          <div class="balance-status-card section-card">
-            <p>Your Balance: <strong id="withdraw-balance">0 PTS</strong></p>
-            <div class="withdraw-progress-track">
-              <div class="withdraw-progress-fill" id="withdraw-progress-fill"></div>
-            </div>
-            <p class="withdraw-progress-label" id="withdraw-progress-label">0 / 100,000 PTS</p>
-          </div>
- 
-          <div id="exchange-section">
-            <button class="exchange-btn" id="exchange-btn" disabled>
-              💱 Exchange Points
-            </button>
-          </div>
- 
-          <!-- Withdraw Form -->
-          <div class="section-card withdraw-form-card" id="withdraw-form-card" style="display:none;">
-            <h3>💸 Withdrawal Request</h3>
-            <div class="form-group">
-              <label>Wallet Address</label>
-              <input type="text" id="wallet-address" placeholder="Enter your wallet address" />
-            </div>
-            <div class="form-group">
-              <label>Amount (USDT)</label>
-              <input type="number" id="withdraw-amount" placeholder="Min $5" min="5" />
-            </div>
-            <div class="form-group">
-              <label>Crypto Type</label>
-              <select id="crypto-type">
-                <option value="USDT_TRC20">USDT TRC20</option>
-                <option value="USDT_BEP20">USDT BEP20</option>
-              </select>
-            </div>
-            <button class="submit-withdraw-btn" id="submit-withdraw-btn">Submit Withdrawal</button>
-          </div>
- 
-          <!-- Withdrawal History -->
-          <div class="section-card">
-            <div class="card-header"><h3>📋 Withdrawal History</h3></div>
-            <div class="history-list" id="withdraw-history-list">
-              <p class="empty-msg">No withdrawals yet.</p>
-            </div>
-          </div>
- 
-        </div>
-      </section>
- 
-      <!-- ===== PROFILE SCREEN ===== -->
-      <section class="screen" id="screen-profile">
-        <div class="screen-inner">
- 
-          <div class="profile-hero">
-            <div class="profile-avatar-wrap">
-              <img id="profile-avatar" src="" alt="" />
-              <span id="profile-avatar-fallback" class="avatar-fallback large"></span>
-            </div>
-            <h2 id="profile-name">—</h2>
-            <span class="profile-badge">ARENA MEMBER</span>
-          </div>
- 
-          <div class="stats-grid section-card">
-            <div class="profile-stat">
-              <span class="pstat-val" id="pstat-balance">0</span>
-              <span class="pstat-lbl">Balance</span>
-            </div>
-            <div class="profile-stat">
-              <span class="pstat-val" id="pstat-total">0</span>
-              <span class="pstat-lbl">Total Earned</span>
-            </div>
-            <div class="profile-stat">
-              <span class="pstat-val" id="pstat-ads">0</span>
-              <span class="pstat-lbl">Ads Watched</span>
-            </div>
-            <div class="profile-stat">
-              <span class="pstat-val" id="pstat-refs">0</span>
-              <span class="pstat-lbl">Referrals</span>
-            </div>
-          </div>
- 
-          <!-- Earnings History -->
-          <div class="section-card">
-            <div class="card-header"><h3>💰 Earnings History</h3></div>
-            <div class="history-list" id="earnings-history-list">
-              <p class="empty-msg">No earnings yet.</p>
-            </div>
-          </div>
- 
-          <!-- Settings -->
-          <div class="section-card settings-card">
-            <h3>⚙️ Settings</h3>
-            <div class="setting-row">
-              <span>Dark Mode</span>
-              <label class="toggle-switch">
-                <input type="checkbox" id="dark-mode-toggle" checked />
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-            <div class="setting-row">
-              <span>Reset Daily Progress</span>
-              <button class="danger-btn" id="reset-daily-btn">Reset</button>
-            </div>
-            <div class="setting-row">
-              <span>Clear All Data</span>
-              <button class="danger-btn" id="clear-data-btn">Clear</button>
-            </div>
-          </div>
- 
-        </div>
-      </section>
- 
-    </main>
- 
-  </div><!-- /#app -->
- 
-  <!-- ADMIN PANEL OVERLAY -->
-  <div id="admin-panel" class="admin-overlay" style="display:none;">
-    <div class="admin-container">
-      <div class="admin-header">
-        <h2>⚙️ Admin Panel</h2>
-        <button id="close-admin-btn" class="close-btn">✕</button>
-      </div>
- 
-      <!-- Admin Login -->
-      <div id="admin-login" class="admin-section">
-        <h3>Admin Login</h3>
-        <div class="form-group">
-          <input type="password" id="admin-password" placeholder="Enter admin password" />
-        </div>
-        <button class="submit-withdraw-btn" id="admin-login-btn">Login</button>
-      </div>
- 
-      <!-- Admin Dashboard -->
-      <div id="admin-dashboard" class="admin-section" style="display:none;">
-        <div class="admin-tabs">
-          <button class="admin-tab active" data-tab="ads">📢 Ads</button>
-          <button class="admin-tab" data-tab="users">👥 Users</button>
-          <button class="admin-tab" data-tab="withdrawals">💸 Withdrawals</button>
-        </div>
- 
-        <!-- Ads Management -->
-        <div class="admin-tab-content active" id="admin-tab-ads">
-          <button class="submit-withdraw-btn" id="add-ad-btn" style="margin-bottom:12px;">+ Add Advertisement</button>
-          <div id="ads-management-list"></div>
-          <div class="ad-form" id="ad-form" style="display:none;">
-            <h4 id="ad-form-title">Add Advertisement</h4>
-            <div class="form-group"><label>Title</label><input type="text" id="ad-title" placeholder="Ad Title"/></div>
-            <div class="form-group"><label>Description</label><input type="text" id="ad-desc" placeholder="Description"/></div>
-            <div class="form-group"><label>URL</label><input type="text" id="ad-url" placeholder="https://..."/></div>
-            <div class="form-group"><label>Reward Points</label><input type="number" id="ad-reward" placeholder="70"/></div>
-            <button class="submit-withdraw-btn" id="save-ad-btn">Save Ad</button>
-            <button class="danger-btn" id="cancel-ad-btn" style="margin-top:8px;">Cancel</button>
-          </div>
-        </div>
- 
-        <!-- Users -->
-        <div class="admin-tab-content" id="admin-tab-users">
-          <div class="form-group"><input type="text" id="user-search" placeholder="Search users..."/></div>
-          <div id="users-list"></div>
-        </div>
- 
-        <!-- Withdrawals -->
-        <div class="admin-tab-content" id="admin-tab-withdrawals">
-          <div id="withdrawals-list"></div>
-        </div>
-      </div>
+
+    <div class="card">
+      <h3>Weekly Rank</h3>
+      <p id="weekly-rank">-</p>
     </div>
-  </div>
- 
-  <!-- TOAST NOTIFICATION -->
-  <div id="toast" class="toast"></div>
- 
-  <script src="script.js"></script>
+
+    <button id="watch-ad-btn">WATCH ADS</button>
+
+    <div class="history">
+      <h3>Recent Activity</h3>
+      <div id="history"></div>
+    </div>
+
+  </section>
+
+  <!-- REF -->
+  <section id="screen-ref" class="screen">
+    <h2>REFERRALS</h2>
+
+    <p>Your Link:</p>
+    <input id="ref-link" readonly>
+
+    <button id="copy-btn">Copy</button>
+    <button id="share-btn">Share</button>
+
+    <h3>Total: <span id="ref-total">0</span></h3>
+    <p>$0.10 per referral</p>
+  </section>
+
+  <!-- PROFILE -->
+  <section id="screen-profile" class="screen">
+    <h2>PROFILE</h2>
+
+    <p>Ads Watched: <span id="p-ads">0</span></p>
+    <p>Referrals: <span id="p-ref">0</span></p>
+    <p>Weekly Rank: <span id="p-rank">-</span></p>
+  </section>
+
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button data-tab="home">Home</button>
+  <button data-tab="ref">Ref</button>
+  <button data-tab="profile">Profile</button>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
- 
