@@ -1,31 +1,324 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>ADS ARENA TEST</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+<title>Ads Arena</title>
+<meta name="description" content="Watch ads, climb the weekly arena, earn USDT." />
+ 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+ 
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-<div id="app">
-
-  <h1 id="user-name">Loading...</h1>
-
-  <div class="card">
-    Ads Watched: <span id="ads-watched">0</span>
-  </div>
-
-  <button id="watch-ad-btn">WATCH AD</button>
-
+ 
+<!-- Telegram Mini App SDK -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+ 
+<!--
+  Monetag Rewarded Interstitial SDK.
+  Replace ZONE_ID below with your real Monetag main zone ID from the Monetag dashboard.
+  The tag below creates a global function called show_ZONE_ID() — script.js looks for it
+  automatically. While ZONE_ID is still the placeholder, script.js falls back to a
+  simulated ad so the app stays testable outside Monetag/Telegram.
+-->
+<script src="https://libtl.com/sdk.js" data-zone="REPLACE_WITH_YOUR_ZONE_ID" data-sdk="show_REPLACE_WITH_YOUR_ZONE_ID"></script>
+ 
+<div class="app-frame">
+ 
+  <header class="app-header">
+    <div class="brand"><span class="brand-dot"></span>ADS ARENA</div>
+    <div class="week-chip" id="weekChip" title="Time left in this week's arena">
+      <span class="week-chip-label">RESETS</span>
+      <span class="week-chip-time" id="weekCountdown">—</span>
+    </div>
+  </header>
+ 
+  <main class="app-main" id="appMain">
+ 
+    <!-- ============ HOME ============ -->
+    <section class="page active" id="page-home" data-page="home">
+ 
+      <div class="ticket hero-ticket">
+        <div class="ticket-stub">
+          <img class="avatar" id="homeAvatar" src="" alt="Profile photo" />
+        </div>
+        <div class="ticket-divider"></div>
+        <div class="ticket-body">
+          <p class="eyebrow">PLAYER</p>
+          <h2 class="ticket-title" id="homeName">Loading…</h2>
+          <p class="muted" id="homeUsername">@—</p>
+        </div>
+      </div>
+ 
+      <div class="stat-row">
+        <div class="ticket stat-chip stat-gold">
+          <span class="stat-value" id="statAdsWatched">0</span>
+          <span class="stat-label">Ads Watched</span>
+        </div>
+        <div class="ticket stat-chip stat-cyan">
+          <span class="stat-value" id="statReferrals">0</span>
+          <span class="stat-label">Referrals</span>
+        </div>
+        <div class="ticket stat-chip stat-magenta">
+          <span class="stat-value" id="statWeeklyRank">—</span>
+          <span class="stat-label">Weekly Rank</span>
+        </div>
+      </div>
+ 
+      <button class="watch-ticket" id="watchAdBtn" type="button">
+        <span class="watch-icon-zone">
+          <svg class="watch-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 4.5v15l13-7.5-13-7.5Z" fill="currentColor"/>
+          </svg>
+        </span>
+        <span class="watch-divider"></span>
+        <span class="watch-label-zone">
+          <span class="watch-label" id="watchLabel">WATCH AD</span>
+          <span class="watch-sub" id="watchReward">+50 PTS &middot; +1 AD</span>
+        </span>
+      </button>
+      <p class="hint" id="adStatus" aria-live="polite"></p>
+ 
+      <div class="section-block">
+        <div class="section-head">
+          <h3>Activity</h3>
+          <span class="muted small">Recent first</span>
+        </div>
+        <ul class="ticket-list" id="activityList"></ul>
+      </div>
+ 
+    </section>
+ 
+    <!-- ============ REFERRAL ============ -->
+    <section class="page" id="page-referral" data-page="referral">
+ 
+      <div class="section-head">
+        <h2>Invite &amp; Earn</h2>
+        <p class="muted">Earn $0.10 the moment a friend opens your link.</p>
+      </div>
+ 
+      <div class="stat-row two">
+        <div class="ticket stat-chip stat-cyan">
+          <span class="stat-value" id="refTotalReferrals">0</span>
+          <span class="stat-label">Total Referrals</span>
+        </div>
+        <div class="ticket stat-chip stat-cyan">
+          <span class="stat-value" id="refTotalEarnings">$0.00</span>
+          <span class="stat-label">Referral Earnings</span>
+        </div>
+      </div>
+ 
+      <div class="ticket link-ticket">
+        <div class="ticket-stub">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 12a3 3 0 0 0 4.24.2l.16-.16 2-2a3 3 0 0 0-4.18-4.3l-.18.14M15 12a3 3 0 0 0-4.24-.2l-.16.16-2 2a3 3 0 0 0 4.18 4.3l.18-.14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <div class="ticket-divider"></div>
+        <div class="ticket-body">
+          <p class="eyebrow">YOUR LINK</p>
+          <p class="link-text" id="refLinkText">—</p>
+        </div>
+      </div>
+ 
+      <div class="action-row">
+        <button class="btn btn-secondary" id="copyRefBtn" type="button">Copy Link</button>
+        <button class="btn btn-primary" id="shareRefBtn" type="button">Share</button>
+      </div>
+ 
+      <div class="section-block">
+        <div class="section-head">
+          <h3>Withdraw</h3>
+          <span class="muted small" id="withdrawMinHint">Min $1.00</span>
+        </div>
+        <div class="ticket withdraw-card">
+          <div>
+            <p class="eyebrow">AVAILABLE</p>
+            <p class="withdraw-amount" id="withdrawAvailable">$0.00</p>
+          </div>
+          <button class="btn btn-secondary" id="withdrawBtn" type="button">Request</button>
+        </div>
+      </div>
+ 
+      <div class="section-block">
+        <div class="section-head">
+          <h3>Invited Friends</h3>
+        </div>
+        <ul class="ticket-list" id="referralList"></ul>
+      </div>
+ 
+    </section>
+ 
+    <!-- ============ RANK ============ -->
+    <section class="page" id="page-rank" data-page="rank">
+ 
+      <div class="section-head">
+        <h2>Weekly Arena</h2>
+        <p class="muted">Top 20 split $20.00 USDT every week.</p>
+      </div>
+ 
+      <div class="ticket hero-ticket you-ticket">
+        <div class="ticket-stub">
+          <span class="rank-pos" id="myRankPos">—</span>
+        </div>
+        <div class="ticket-divider"></div>
+        <div class="ticket-body">
+          <p class="eyebrow">YOUR POSITION</p>
+          <h3 class="ticket-title" id="myRankAds">0 ads this week</h3>
+        </div>
+      </div>
+ 
+      <div class="reward-tiers">
+        <div class="tier tier-gold">
+          <span class="tier-place">1st</span>
+          <span class="tier-req">10,000+ ads</span>
+          <span class="tier-pay">$4.00</span>
+        </div>
+        <div class="tier tier-silver">
+          <span class="tier-place">2nd</span>
+          <span class="tier-req">8,000+ ads</span>
+          <span class="tier-pay">$2.00</span>
+        </div>
+        <div class="tier tier-bronze">
+          <span class="tier-place">3rd–20th</span>
+          <span class="tier-req">5,000+ ads</span>
+          <span class="tier-pay">$0.7778</span>
+        </div>
+      </div>
+ 
+      <div class="section-block">
+        <div class="section-head">
+          <h3>Leaderboard</h3>
+          <span class="muted small" id="weekResetHint"></span>
+        </div>
+        <ol class="ticket-list leaderboard" id="leaderboardList"></ol>
+      </div>
+ 
+      <details class="rules-box">
+        <summary>Rules</summary>
+        <ul>
+          <li>Only users meeting the minimum watch counts for their tier qualify for a reward.</li>
+          <li>Weekly rankings reset automatically every 7 days.</li>
+          <li>Referral fraud is not allowed and is monitored.</li>
+          <li>Fake or duplicate accounts may be removed from rankings.</li>
+        </ul>
+      </details>
+ 
+    </section>
+ 
+    <!-- ============ PROFILE ============ -->
+    <section class="page" id="page-profile" data-page="profile">
+ 
+      <div class="ticket hero-ticket">
+        <div class="ticket-stub">
+          <img class="avatar" id="profAvatar" src="" alt="Profile photo" />
+        </div>
+        <div class="ticket-divider"></div>
+        <div class="ticket-body">
+          <h2 class="ticket-title" id="profName">—</h2>
+          <p class="muted" id="profUsername">@—</p>
+          <p class="muted small" id="profJoined"></p>
+        </div>
+      </div>
+ 
+      <div class="stat-row two-by-two">
+        <div class="ticket stat-chip stat-gold">
+          <span class="stat-value" id="profAdsWatched">0</span>
+          <span class="stat-label">Ads Watched</span>
+        </div>
+        <div class="ticket stat-chip stat-cyan">
+          <span class="stat-value" id="profReferrals">0</span>
+          <span class="stat-label">Referrals</span>
+        </div>
+        <div class="ticket stat-chip stat-magenta">
+          <span class="stat-value" id="profWeeklyRank">—</span>
+          <span class="stat-label">Weekly Rank</span>
+        </div>
+        <div class="ticket stat-chip stat-cyan">
+          <span class="stat-value" id="profEarnings">$0.00</span>
+          <span class="stat-label">Referral Earnings</span>
+        </div>
+      </div>
+ 
+      <div class="section-block">
+        <div class="section-head"><h3>About this demo</h3></div>
+        <p class="muted small leading">
+          This build runs entirely in your browser using local storage to stand in for a backend.
+          Ad rewards, referral credits and rankings are wired up to real logic, but only a real
+          server can verify Monetag postbacks, sync rankings across every player and stop fraud
+          for production use.
+        </p>
+        <button class="btn btn-secondary full" id="resetDemoBtn" type="button">Reset Demo Data</button>
+      </div>
+ 
+    </section>
+ 
+    <!-- ============ ADMIN (hidden unless an admin id is configured) ============ -->
+    <section class="page" id="page-admin" data-page="admin">
+ 
+      <div class="section-head">
+        <h2>Admin</h2>
+        <p class="muted">Local snapshot — connect a backend for live, multi-device data.</p>
+      </div>
+ 
+      <div class="stat-row two">
+        <div class="ticket stat-chip stat-gold">
+          <span class="stat-value" id="adminTotalAds">0</span>
+          <span class="stat-label">Total Ads Watched</span>
+        </div>
+        <div class="ticket stat-chip stat-cyan">
+          <span class="stat-value" id="adminTotalUsers">0</span>
+          <span class="stat-label">Users Tracked</span>
+        </div>
+      </div>
+ 
+      <div class="admin-tabs" id="adminTabs">
+        <button class="admin-tab-btn active" data-tab="users" type="button">Users</button>
+        <button class="admin-tab-btn" data-tab="referrals" type="button">Referrals</button>
+        <button class="admin-tab-btn" data-tab="rankings" type="button">Rankings</button>
+        <button class="admin-tab-btn" data-tab="withdrawals" type="button">Withdrawals</button>
+        <button class="admin-tab-btn" data-tab="rewards" type="button">Rewards</button>
+      </div>
+ 
+      <div class="admin-panel" id="adminPanelUsers"></div>
+      <div class="admin-panel" id="adminPanelReferrals" hidden></div>
+      <div class="admin-panel" id="adminPanelRankings" hidden></div>
+      <div class="admin-panel" id="adminPanelWithdrawals" hidden></div>
+      <div class="admin-panel" id="adminPanelRewards" hidden></div>
+ 
+    </section>
+ 
+  </main>
+ 
+  <nav class="tab-bar" id="tabBar">
+    <button class="tab-btn active" data-page="home" type="button">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 11.5 12 4l8 7.5M6 10v9a1 1 0 0 0 1 1h3v-5h4v5h3a1 1 0 0 0 1-1v-9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="tab-btn" data-page="referral" type="button">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="7" cy="6" r="2.4" stroke="currentColor" stroke-width="1.7"/><circle cx="17" cy="6" r="2.4" stroke="currentColor" stroke-width="1.7"/><path d="M3 19c0-3 1.8-5 4-5s4 2 4 5M13 19c0-3 1.8-5 4-5s4 2 4 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+      <span>Refer</span>
+    </button>
+    <button class="tab-btn" data-page="rank" type="button">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M8 21h8M12 17v4M6 4h12v4a6 6 0 0 1-12 0V4ZM6 6H4a2 2 0 0 0 2 4M18 6h2a2 2 0 0 1-2 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Rank</span>
+    </button>
+    <button class="tab-btn" data-page="profile" type="button">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 19.5c1-3.6 4-5.5 7.5-5.5s6.5 1.9 7.5 5.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+      <span>Profile</span>
+    </button>
+    <button class="tab-btn" id="adminTabBtn" data-page="admin" type="button" hidden>
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 5-3.2 8-7 10-3.8-2-7-5-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+      <span>Admin</span>
+    </button>
+  </nav>
+ 
 </div>
-
-<!-- MONETAG -->
-<script src="//libtl.com/sdk.js"
-        data-zone="11083093"
-        data-sdk="show_11083093"></script>
-
-<!-- SCRIPT -->
+ 
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+ 
 <script src="script.js"></script>
-
 </body>
 </html>
+ 
