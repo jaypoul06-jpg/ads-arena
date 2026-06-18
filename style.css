@@ -1,15 +1,735 @@
-body {
-  background: black;
-  color: white;
-  font-family: Arial;
-  text-align: center;
-  padding-top: 50px;
+/* =========================================================================
+   ADS ARENA — design tokens
+   Palette: void/panel neutrals + three semantic accents.
+     gold    -> ads watched / points / the watch-ad action
+     cyan    -> referrals / money
+     magenta -> rank / competition / urgency
+   Type: Anton (display, used sparingly) + Manrope (body/UI) + Space Mono
+   (counters, currency, codes — gives every number a "scoreboard" feel).
+   Signature element: the perforated "ticket" card, used everywhere a piece
+   of information is being "redeemed" — stats, the watch button, the
+   referral code, leaderboard rows.
+   ========================================================================= */
+
+:root{
+  --void:#0b0b13;
+  --panel:#15151f;
+  --panel-raised:#1c1c29;
+  --stroke:rgba(255,255,255,.08);
+  --stroke-strong:rgba(255,255,255,.16);
+
+  --gold:#ffb627;
+  --gold-deep:#ff7a3d;
+  --cyan:#36e0c5;
+  --magenta:#ff3d6e;
+
+  --white:#f5f4fa;
+  --ink:#c9c7d9;
+  --ink-dim:#85839c;
+
+  --font-display:'Anton',sans-serif;
+  --font-body:'Manrope',sans-serif;
+  --font-mono:'Space Mono',monospace;
+
+  --radius-lg:20px;
+  --radius-md:14px;
+  --radius-sm:10px;
+
+  color-scheme: dark;
 }
 
-button {
-  padding: 15px;
-  background: blue;
-  color: white;
-  border: none;
-  margin-top: 20px;
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+
+body{
+  background:var(--void);
+  color:var(--white);
+  font-family:var(--font-body);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+
+/* faint scoreboard dot-grid behind everything, very subtle */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background-image:radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size:18px 18px;
+  pointer-events:none;
+  z-index:0;
+}
+
+button{font-family:inherit;}
+ul,ol{margin:0;padding:0;list-style:none;}
+h1,h2,h3,p{margin:0;}
+img{display:block;max-width:100%;}
+
+:focus-visible{
+  outline:2px solid var(--cyan);
+  outline-offset:2px;
+}
+
+/* =========================================================================
+   APP FRAME
+   ========================================================================= */
+
+.app-frame{
+  position:relative;
+  z-index:1;
+  max-width:480px;
+  min-height:100vh;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  background:linear-gradient(180deg, #0e0e18 0%, var(--void) 320px);
+  border-left:1px solid var(--stroke);
+  border-right:1px solid var(--stroke);
+}
+
+.app-header{
+  position:sticky;
+  top:0;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px 18px 14px;
+  background:rgba(11,11,19,.85);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--stroke);
+}
+
+.brand{
+  font-family:var(--font-display);
+  font-size:19px;
+  letter-spacing:.04em;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.brand-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--gold);
+  box-shadow:0 0 10px var(--gold);
+}
+
+.week-chip{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,61,110,.35);
+  background:rgba(255,61,110,.1);
+}
+.week-chip-label{
+  font-size:9px;
+  letter-spacing:.08em;
+  color:var(--magenta);
+  font-weight:700;
+}
+.week-chip-time{
+  font-family:var(--font-mono);
+  font-size:12px;
+  color:var(--white);
+}
+
+.app-main{
+  flex:1;
+  padding:18px 18px 100px;
+}
+
+.page{display:none;}
+.page.active{
+  display:block;
+  animation:page-in .28s ease both;
+}
+@keyframes page-in{
+  from{opacity:0; transform:translateY(6px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+/* =========================================================================
+   TICKET — signature card component
+   Every ticket gets a small punched hole on its left edge. Hero tickets
+   (profile header, watch button, your-rank card) additionally get a
+   left "stub" compartment separated by a dashed perforation line, with
+   matching holes top and bottom of the seam.
+   ========================================================================= */
+
+.ticket{
+  position:relative;
+  background:var(--panel);
+  border:1px solid var(--stroke);
+  border-radius:var(--radius-md);
+}
+.ticket::before{
+  content:"";
+  position:absolute;
+  top:50%; left:0;
+  width:11px;height:11px;
+  background:var(--void);
+  border:1px solid var(--stroke);
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+}
+
+.hero-ticket{
+  display:flex;
+  align-items:center;
+  border-radius:var(--radius-lg);
+  margin-bottom:14px;
+  overflow:hidden;
+}
+.hero-ticket.large{padding:0;}
+
+.ticket-stub{
+  flex:0 0 74px;
+  align-self:stretch;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--panel-raised);
+  color:var(--gold);
+}
+.ticket-divider{
+  align-self:stretch;
+  width:0;
+  position:relative;
+  border-left:2px dashed var(--stroke-strong);
+  margin:10px 0;
+}
+.ticket-divider::before,
+.ticket-divider::after{
+  content:"";
+  position:absolute;
+  left:-7px;
+  width:14px;height:14px;
+  background:var(--void);
+  border:1px solid var(--stroke);
+  border-radius:50%;
+}
+.ticket-divider::before{top:-17px;}
+.ticket-divider::after{bottom:-17px;}
+
+.ticket-body{
+  padding:16px 18px;
+  min-width:0;
+}
+.ticket-title{
+  font-size:20px;
+  font-weight:800;
+  line-height:1.15;
+}
+
+.avatar{
+  width:48px;height:48px;
+  border-radius:50%;
+  object-fit:cover;
+  background:var(--panel);
+  border:2px solid var(--gold);
+}
+.avatar.large{width:56px;height:56px;}
+
+.eyebrow{
+  font-size:10px;
+  letter-spacing:.12em;
+  color:var(--ink-dim);
+  font-weight:700;
+  margin-bottom:4px;
+}
+
+.muted{color:var(--ink); font-size:14px;}
+.muted.small{font-size:12px; color:var(--ink-dim);}
+.muted.leading{line-height:1.6; margin-bottom:14px;}
+
+/* =========================================================================
+   STAT ROW
+   ========================================================================= */
+
+.stat-row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-bottom:18px;
+}
+.stat-row.two{grid-template-columns:repeat(2,1fr);}
+.stat-row.two-by-two{grid-template-columns:repeat(2,1fr);}
+
+.stat-chip{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:4px;
+  padding:14px 14px 12px 20px;
+}
+.stat-value{
+  font-family:var(--font-mono);
+  font-weight:700;
+  font-size:19px;
+}
+.stat-label{
+  font-size:11px;
+  color:var(--ink-dim);
+  letter-spacing:.02em;
+}
+.stat-gold .stat-value{color:var(--gold);}
+.stat-cyan .stat-value{color:var(--cyan);}
+.stat-magenta .stat-value{color:var(--magenta);}
+
+/* =========================================================================
+   WATCH AD BUTTON — the "golden ticket"
+   ========================================================================= */
+
+.watch-ticket{
+  width:100%;
+  display:flex;
+  align-items:center;
+  border:none;
+  border-radius:var(--radius-lg);
+  padding:0;
+  margin-bottom:8px;
+  cursor:pointer;
+  overflow:hidden;
+  background:linear-gradient(120deg, var(--gold), var(--gold-deep));
+  box-shadow:0 10px 30px -10px rgba(255,122,61,.55);
+  animation:watch-pulse 2.6s ease-in-out infinite;
+}
+.watch-ticket:active{transform:scale(.98);}
+.watch-ticket:disabled{
+  opacity:.7;
+  cursor:default;
+  animation:none;
+}
+@keyframes watch-pulse{
+  0%,100%{box-shadow:0 10px 30px -10px rgba(255,122,61,.55);}
+  50%{box-shadow:0 10px 38px -6px rgba(255,122,61,.85);}
+}
+@media (prefers-reduced-motion: reduce){
+  .watch-ticket{animation:none;}
+}
+
+.watch-icon-zone{
+  flex:0 0 64px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  align-self:stretch;
+  color:#1c1206;
+}
+.watch-icon{width:24px;height:24px;}
+
+.watch-divider{
+  align-self:stretch;
+  width:0;
+  border-left:2px dashed rgba(28,18,6,.3);
+  margin:14px 0;
+}
+
+.watch-label-zone{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:2px;
+  padding:14px 18px;
+  text-align:left;
+}
+.watch-label{
+  font-family:var(--font-display);
+  font-size:22px;
+  letter-spacing:.03em;
+  color:#1c1206;
+}
+.watch-sub{
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:rgba(28,18,6,.7);
+}
+
+.hint{
+  min-height:18px;
+  font-size:12px;
+  color:var(--ink-dim);
+  margin:8px 2px 18px;
+  text-align:center;
+}
+.hint.ok{color:var(--cyan);}
+.hint.err{color:var(--magenta);}
+
+/* =========================================================================
+   SECTION / LISTS
+   ========================================================================= */
+
+.section-block{margin-bottom:20px;}
+.section-head{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  margin-bottom:10px;
+  gap:8px;
+}
+.section-head h2{font-family:var(--font-display); font-size:24px; letter-spacing:.02em;}
+.section-head h3{font-size:15px; font-weight:800;}
+.section-head p.muted{margin-top:4px;}
+
+.ticket-list{display:flex; flex-direction:column; gap:8px;}
+
+.ticket-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:11px 14px 11px 20px;
+}
+.ticket-item .ti-main{display:flex; align-items:center; gap:10px; min-width:0;}
+.ticket-item .ti-text{min-width:0;}
+.ticket-item .ti-title{font-size:13px; font-weight:700; color:var(--white);}
+.ticket-item .ti-time{font-size:11px; color:var(--ink-dim);}
+.ticket-item .ti-value{
+  font-family:var(--font-mono);
+  font-size:13px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.ti-value.pos{color:var(--cyan);}
+.ti-value.neutral{color:var(--gold);}
+
+.empty-row{
+  text-align:center;
+  padding:22px 10px;
+  color:var(--ink-dim);
+  font-size:13px;
+  border:1px dashed var(--stroke-strong);
+  border-radius:var(--radius-md);
+}
+
+/* =========================================================================
+   REFERRAL PAGE
+   ========================================================================= */
+
+.link-ticket{display:flex; align-items:center; margin-bottom:12px;}
+.link-text{
+  font-family:var(--font-mono);
+  font-size:13px;
+  color:var(--cyan);
+  word-break:break-all;
+}
+
+.action-row{display:flex; gap:10px; margin-bottom:20px;}
+
+.btn{
+  flex:1;
+  border:none;
+  border-radius:var(--radius-sm);
+  padding:13px 16px;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  text-align:center;
+}
+.btn-primary{
+  background:linear-gradient(120deg, var(--cyan), #1fb7a0);
+  color:#06231e;
+}
+.btn-secondary{
+  background:var(--panel-raised);
+  color:var(--white);
+  border:1px solid var(--stroke-strong);
+}
+.btn.full{flex:none; width:100%;}
+.btn:active{transform:scale(.98);}
+
+.withdraw-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 16px 14px 20px;
+}
+.withdraw-amount{
+  font-family:var(--font-mono);
+  font-size:18px;
+  font-weight:700;
+  color:var(--cyan);
+}
+
+/* =========================================================================
+   RANK PAGE
+   ========================================================================= */
+
+.you-ticket .ticket-stub{color:var(--magenta);}
+.rank-pos{
+  font-family:var(--font-mono);
+  font-size:20px;
+  font-weight:700;
+}
+
+.reward-tiers{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-bottom:20px;
+}
+.tier{
+  display:grid;
+  grid-template-columns:1fr 1fr auto;
+  align-items:center;
+  gap:8px;
+  padding:11px 16px;
+  border-radius:var(--radius-md);
+  border:1px solid var(--stroke);
+  background:var(--panel);
+  font-size:12.5px;
+}
+.tier-place{font-weight:800;}
+.tier-req{color:var(--ink-dim);}
+.tier-pay{
+  font-family:var(--font-mono);
+  font-weight:700;
+  text-align:right;
+}
+.tier-gold{border-color:rgba(255,182,39,.35);}
+.tier-gold .tier-pay{color:var(--gold);}
+.tier-silver{border-color:rgba(54,224,197,.3);}
+.tier-silver .tier-pay{color:var(--cyan);}
+.tier-bronze{border-color:rgba(255,61,110,.25);}
+.tier-bronze .tier-pay{color:var(--magenta);}
+
+.leaderboard-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 14px 10px 20px;
+}
+.lb-rank{
+  flex:0 0 28px;
+  font-family:var(--font-mono);
+  font-weight:700;
+  font-size:14px;
+  color:var(--ink-dim);
+  text-align:center;
+}
+.leaderboard-row.top1 .lb-rank{color:var(--gold);}
+.leaderboard-row.top2 .lb-rank{color:#d7d7e2;}
+.leaderboard-row.top3 .lb-rank{color:var(--gold-deep);}
+.lb-avatar{
+  width:32px;height:32px;
+  border-radius:50%;
+  object-fit:cover;
+  background:var(--panel-raised);
+  flex:0 0 32px;
+}
+.lb-name{
+  flex:1;
+  min-width:0;
+  font-size:13px;
+  font-weight:700;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.lb-ads{
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--ink);
+  white-space:nowrap;
+}
+.leaderboard-row.me{
+  border-color:rgba(255,61,110,.5);
+  box-shadow:0 0 0 1px rgba(255,61,110,.25) inset;
+}
+.leaderboard-row.me .lb-name::after{
+  content:" (you)";
+  color:var(--magenta);
+  font-weight:600;
+}
+
+.rules-box{
+  background:var(--panel);
+  border:1px solid var(--stroke);
+  border-radius:var(--radius-md);
+  padding:4px 16px;
+  margin-bottom:10px;
+}
+.rules-box summary{
+  cursor:pointer;
+  padding:12px 0;
+  font-weight:700;
+  font-size:13px;
+  list-style:none;
+}
+.rules-box summary::-webkit-details-marker{display:none;}
+.rules-box summary::before{content:"+ "; color:var(--magenta);}
+.rules-box[open] summary::before{content:"– ";}
+.rules-box ul{padding:0 0 14px 4px; display:flex; flex-direction:column; gap:8px;}
+.rules-box li{
+  font-size:12.5px;
+  color:var(--ink-dim);
+  line-height:1.5;
+  padding-left:14px;
+  position:relative;
+}
+.rules-box li::before{
+  content:"";
+  position:absolute;
+  left:0; top:7px;
+  width:5px;height:5px;
+  border-radius:50%;
+  background:var(--magenta);
+}
+
+/* =========================================================================
+   TAB BAR
+   ========================================================================= */
+
+.tab-bar{
+  position:fixed;
+  left:0; right:0; bottom:0;
+  z-index:6;
+  max-width:480px;
+  margin:0 auto;
+  display:flex;
+  background:rgba(15,15,22,.92);
+  backdrop-filter:blur(12px);
+  border-top:1px solid var(--stroke);
+  padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+}
+.tab-btn{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:3px;
+  background:none;
+  border:none;
+  color:var(--ink-dim);
+  padding:6px 2px;
+  border-radius:10px;
+  cursor:pointer;
+}
+.tab-btn svg{width:21px; height:21px;}
+.tab-btn span{font-size:10.5px; font-weight:600;}
+.tab-btn.active{color:var(--white);}
+.tab-btn.active svg{color:var(--gold);}
+
+/* =========================================================================
+   ADMIN
+   ========================================================================= */
+
+.admin-tabs{
+  display:flex;
+  gap:6px;
+  overflow-x:auto;
+  margin-bottom:16px;
+  padding-bottom:2px;
+}
+.admin-tab-btn{
+  flex:0 0 auto;
+  background:var(--panel);
+  border:1px solid var(--stroke);
+  color:var(--ink);
+  font-size:12.5px;
+  font-weight:700;
+  padding:9px 14px;
+  border-radius:999px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.admin-tab-btn.active{
+  background:var(--magenta);
+  border-color:var(--magenta);
+  color:#2a0010;
+}
+
+.admin-table{width:100%; border-collapse:collapse; font-size:12.5px;}
+.admin-table th{
+  text-align:left;
+  color:var(--ink-dim);
+  font-size:10.5px;
+  letter-spacing:.05em;
+  font-weight:700;
+  padding:0 8px 8px;
+  border-bottom:1px solid var(--stroke);
+}
+.admin-table td{
+  padding:10px 8px;
+  border-bottom:1px solid var(--stroke);
+  color:var(--ink);
+  vertical-align:middle;
+}
+.admin-table tr:last-child td{border-bottom:none;}
+.admin-table .num{font-family:var(--font-mono);}
+
+.pill{
+  display:inline-block;
+  padding:3px 9px;
+  border-radius:999px;
+  font-size:10.5px;
+  font-weight:700;
+}
+.pill-pending{background:rgba(255,182,39,.15); color:var(--gold);}
+.pill-approved{background:rgba(54,224,197,.15); color:var(--cyan);}
+.pill-rejected{background:rgba(255,61,110,.15); color:var(--magenta);}
+
+.row-actions{display:flex; gap:6px;}
+.mini-btn{
+  border:1px solid var(--stroke-strong);
+  background:var(--panel-raised);
+  color:var(--white);
+  font-size:11px;
+  font-weight:700;
+  padding:5px 9px;
+  border-radius:7px;
+  cursor:pointer;
+}
+.mini-btn.approve{border-color:rgba(54,224,197,.4); color:var(--cyan);}
+.mini-btn.reject{border-color:rgba(255,61,110,.4); color:var(--magenta);}
+
+/* =========================================================================
+   TOAST
+   ========================================================================= */
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:90px;
+  transform:translate(-50%, 12px);
+  background:var(--panel-raised);
+  border:1px solid var(--stroke-strong);
+  color:var(--white);
+  font-size:13px;
+  font-weight:600;
+  padding:11px 18px;
+  border-radius:999px;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .25s ease, transform .25s ease;
+  z-index:50;
+  box-shadow:0 12px 30px -8px rgba(0,0,0,.6);
+  max-width:88vw;
+  text-align:center;
+}
+.toast.show{
+  opacity:1;
+  transform:translate(-50%, 0);
+}
+
+/* =========================================================================
+   RESPONSIVE
+   ========================================================================= */
+
+@media (min-width:481px){
+  body{display:flex; justify-content:center;}
+  .app-frame{
+    border-left:1px solid var(--stroke);
+    border-right:1px solid var(--stroke);
+    box-shadow:0 0 80px rgba(0,0,0,.5);
+  }
+}
+
+@media (max-width:360px){
+  .ticket-stub{flex-basis:60px;}
+  .watch-icon-zone{flex-basis:54px;}
+  .stat-value{font-size:17px;}
 }
